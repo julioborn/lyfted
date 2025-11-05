@@ -68,10 +68,7 @@ export function NavbarProfesor() {
           href="/profesor/dashboard"
           className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2"
         >
-          <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-            <Dumbbell className="h-5 w-5" />
-          </div>
-          <span className="font-bold text-lg hidden sm:inline">GymApp</span>
+          <span className="font-bold text-lg hidden sm:inline">Lyfted</span>
         </Link>
 
         {/* Avatar a la derecha */}

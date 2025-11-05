@@ -1,27 +1,32 @@
-import { type NextRequest, NextResponse } from "next/server"
-import conectarDB from "@/lib/mongodb"
-import Profesor from "@/lib/models/Profesor"
-import Alumno from "@/lib/models/Alumno"
+import { type NextRequest, NextResponse } from "next/server";
+import conectarDB from "@/lib/mongodb";
+import Profesor from "@/lib/models/Profesor";
+import Alumno from "@/lib/models/Alumno";
+import * as bcrypt from "bcryptjs"; // 👈 importante, *as bcrypt (no default)
 
 export async function POST(request: NextRequest) {
   try {
-    await conectarDB()
+    await conectarDB();
 
-    const { identificador, password, tipo } = await request.json()
+    const { identificador, password, tipo } = await request.json();
 
-    console.log("[v0] Login attempt:", { identificador, tipo })
+    console.log("[Lyfted] Intento de login:", { identificador, tipo });
 
     if (tipo === "profesor") {
-      // Login con email para profesores
-      const profesor = await Profesor.findOne({ email: identificador })
+      // 🔹 Buscar profesor por email
+      const profesor = await Profesor.findOne({ email: identificador });
 
       if (!profesor) {
-        return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 })
+        console.log("❌ Profesor no encontrado");
+        return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
       }
 
-      // Verificar contraseña (en producción usar bcrypt)
-      if (profesor.password !== password) {
-        return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 })
+      // 🔐 Comparar contraseña cifrada
+      const passwordValida = await bcrypt.compare(password, profesor.password);
+      console.log("🔍 Comparando contraseñas:", passwordValida ? "OK" : "Falla");
+
+      if (!passwordValida) {
+        return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
       }
 
       return NextResponse.json({
@@ -34,40 +39,44 @@ export async function POST(request: NextRequest) {
           nombreGimnasio: profesor.nombreGimnasio,
           avatar: profesor.avatar,
         },
-      })
-    } else {
-      // Login con DNI para alumnos
-      const alumno = await Alumno.findOne({ dni: identificador })
-
-      if (!alumno) {
-        return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 })
-      }
-
-      if (!alumno.password) {
-        return NextResponse.json({ error: "Alumno no ha completado el registro" }, { status: 401 })
-      }
-
-      // Verificar contraseña (en producción usar bcrypt)
-      if (alumno.password !== password) {
-        return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 })
-      }
-
-      return NextResponse.json({
-        usuario: {
-          id: alumno._id.toString(),
-          nombre: alumno.nombre,
-          email: alumno.email,
-          dni: alumno.dni,
-          tipo: "alumno",
-          profesorId: alumno.profesorId.toString(),
-          planActualId: alumno.planActualId?.toString(),
-          registroCompleto: alumno.registroCompleto,
-          avatar: alumno.avatar,
-        },
-      })
+      });
     }
+
+    // 🔹 Login para alumnos
+    const alumno = await Alumno.findOne({ dni: identificador });
+
+    if (!alumno) {
+      console.log("❌ Alumno no encontrado");
+      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+    }
+
+    if (!alumno.password) {
+      console.log("⚠️ Alumno sin contraseña registrada");
+      return NextResponse.json({ requiereRegistro: true }, { status: 200 });
+    }
+
+    const passwordValida = await bcrypt.compare(password, alumno.password);
+    console.log("🔍 Comparando contraseñas (alumno):", passwordValida ? "OK" : "Falla");
+
+    if (!passwordValida) {
+      return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
+    }
+
+    return NextResponse.json({
+      usuario: {
+        id: alumno._id.toString(),
+        nombre: alumno.nombre,
+        email: alumno.email,
+        dni: alumno.dni,
+        tipo: "alumno",
+        profesorId: alumno.profesorId?.toString(),
+        planActualId: alumno.planActualId?.toString(),
+        registroCompleto: alumno.registroCompleto,
+        avatar: alumno.avatar,
+      },
+    });
   } catch (error) {
-    console.error("[v0] Error en login:", error)
-    return NextResponse.json({ error: "Error en el servidor" }, { status: 500 })
+    console.error("[Lyfted] ❌ Error en login:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }

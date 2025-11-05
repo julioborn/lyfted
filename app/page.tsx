@@ -1,9 +1,9 @@
 "use client"
 
 import { useAuth } from "@/lib/auth-context"
-import { LoginForm } from "@/components/login-form"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
+import { Inicio } from "@/components/Inicio"
 
 export default function HomePage() {
   const { usuario, cargando } = useAuth()
@@ -30,9 +30,9 @@ export default function HomePage() {
     )
   }
 
-  if (usuario) {
-    return null // Redirigiendo...
-  }
+  // Si hay usuario, no mostramos nada (redirige)
+  if (usuario) return null
 
-  return <LoginForm />
+  // Si no hay usuario, mostramos la nueva pantalla de inicio
+  return <Inicio />
 }

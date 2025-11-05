@@ -5,18 +5,52 @@ import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, Clock, PlusCircle, DollarSign, UserPlus, Dumbbell } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import type { Alumno, PlanEntrenamiento, Pago } from "@/types"
 
 export default function DashboardProfesorPage() {
   const { usuario } = useAuth()
-  const alumnos = dataStore.getAlumnos(usuario?.id)
-  const pagos = dataStore.getPagos()
-  const planes = dataStore.getPlanes()
+  const [alumnos, setAlumnos] = useState<Alumno[]>([])
+  const [pagos, setPagos] = useState<Pago[]>([])
+  const [planes, setPlanes] = useState<PlanEntrenamiento[]>([])
+  const [cargando, setCargando] = useState(true)
 
+  // 🧩 Cargar datos cuando el usuario esté listo
+  useEffect(() => {
+    if (!usuario) return
+
+    const fetchData = async () => {
+      try {
+        const [alumnosData, pagosData, planesData] = await Promise.all([
+          dataStore.getAlumnos(usuario.id),
+          dataStore.getPagos(),
+          dataStore.getPlanes(),
+        ])
+        setAlumnos(alumnosData)
+        setPagos(pagosData)
+        setPlanes(planesData)
+      } catch (error) {
+        console.error("Error al cargar datos del dashboard:", error)
+      } finally {
+        setCargando(false)
+      }
+    }
+
+    fetchData()
+  }, [usuario])
+
+  if (cargando) return <p>Cargando...</p>
+
+  // 🧠 Calcular planes a renovar (solo si hay fechaFin válida)
   const planesARenovar = planes.filter((plan) => {
-    const diasRestantes = Math.ceil((new Date(plan.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+    if (!plan?.fechaFin) return false
+    const diasRestantes = Math.ceil(
+      (new Date(plan.fechaFin).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+    )
     return diasRestantes <= 7 && diasRestantes >= 0
   }).length
 
+  // 🧾 Pagos pendientes
   const pagosPendientes = pagos.filter((p) => p.estado === "pendiente").length
 
   const menuItems = [
@@ -74,7 +108,9 @@ export default function DashboardProfesorPage() {
     <div className="space-y-4 md:space-y-6">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">Panel de Control</h1>
-        <p className="text-sm md:text-base text-muted-foreground">Bienvenido, {usuario?.nombre}</p>
+        <p className="text-sm md:text-base text-muted-foreground">
+          Bienvenido, {usuario?.nombre}
+        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

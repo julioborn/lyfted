@@ -10,7 +10,7 @@ interface AuthContextType {
   registrarAlumno: (dni: string, password: string) => Promise<boolean>
   completarDatosAlumno: (datos: Partial<Alumno>) => Promise<boolean>
   cerrarSesion: () => void
-  esProfeso: boolean
+  esProfesor: boolean
   esAlumno: boolean
   cargando: boolean
 }
@@ -30,26 +30,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCargando(false)
   }, [])
 
-  const iniciarSesion = async (credencial: string, password: string, tipo: "profesor" | "alumno"): Promise<boolean> => {
+  const iniciarSesion = async (
+    identificador: string,
+    password: string,
+    tipo: "profesor" | "alumno"
+  ): Promise<boolean> => {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credencial, password, tipo }),
-      })
+        body: JSON.stringify({ identificador, password, tipo }),
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setUsuario(data.usuario)
-        localStorage.setItem("usuario", JSON.stringify(data.usuario))
-        return true
+        const data = await response.json();
+        setUsuario(data.usuario);
+        localStorage.setItem("usuario", JSON.stringify(data.usuario));
+
+        // 👇 Agregar redirección automática
+        if (typeof window !== "undefined") {
+          if (data.usuario.tipo === "profesor") {
+            window.location.href = "/profesor/dashboard";
+          } else if (data.usuario.tipo === "alumno") {
+            window.location.href = "/alumno/dashboard";
+          }
+        }
+
+        return true;
       }
-      return false
+
+      return false;
     } catch (error) {
-      console.error("Error al iniciar sesión:", error)
-      return false
+      console.error("Error al iniciar sesión:", error);
+      return false;
     }
-  }
+  };
 
   const registrarProfesor = async (datos: Partial<Profesor>): Promise<boolean> => {
     try {
@@ -122,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("usuario")
   }
 
-  const esProfeso = usuario?.tipo === "profesor"
+  const esProfesor = usuario?.tipo === "profesor"
   const esAlumno = usuario?.tipo === "alumno"
 
   return (
@@ -134,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         registrarAlumno,
         completarDatosAlumno,
         cerrarSesion,
-        esProfeso,
+        esProfesor,
         esAlumno,
         cargando,
       }}

@@ -70,7 +70,14 @@ export function CardEjercicio({ ejercicio, onEliminar, onEditar }: CardEjercicio
               variant="outline"
               size="sm"
               className="text-destructive hover:bg-destructive hover:text-destructive-foreground bg-transparent"
-              onClick={() => onEliminar?.(ejercicio.id)}
+              onClick={() => {
+                const id = ejercicio.id || ejercicio._id?.toString();
+                if (!id) {
+                  console.warn("❌ No se encontró ID del ejercicio:", ejercicio);
+                  return;
+                }
+                onEliminar?.(id);
+              }}
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -86,8 +93,15 @@ export function CardEjercicio({ ejercicio, onEliminar, onEditar }: CardEjercicio
           </DialogHeader>
           <div className="space-y-4">
             {ejercicio.videoUrl && (
-              <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                <video controls className="w-full h-full" src={ejercicio.videoUrl}>
+              <div className="flex justify-center bg-black rounded-lg overflow-hidden">
+                <video
+                  controls
+                  playsInline
+                  preload="metadata"
+                  controlsList="nodownload"
+                  className="max-h-[80vh] w-auto rounded-lg object-contain"
+                >
+                  <source src={ejercicio.videoUrl} type="video/mp4" />
                   Tu navegador no soporta el elemento de video.
                 </video>
               </div>

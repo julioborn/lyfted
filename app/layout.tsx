@@ -9,9 +9,11 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "GymTrainer Pro - Gestión de Entrenamiento",
-  description: "Aplicación para gestión de entrenamientos personalizados",
-  generator: "v0.app",
+  title: "Lyfted",
+  description: "Aplicación para gestión de entrenamientos personalizados a distancia",
+  icons: {
+    icon: "/favicon.ico", // 👈 o favicon.ico
+  },
 }
 
 export default function RootLayout({

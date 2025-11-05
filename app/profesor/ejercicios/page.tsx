@@ -30,29 +30,67 @@ export default function EjerciciosPage() {
   const [busqueda, setBusqueda] = useState("")
   const [grupoActivo, setGrupoActivo] = useState("Todos")
   const [ejercicios, setEjercicios] = useState<Ejercicio[]>([])
+  const [cargando, setCargando] = useState(true)
 
-  const cargarEjercicios = () => {
-    const ejerciciosCargados = dataStore.getEjercicios(usuario?.id)
-    setEjercicios(ejerciciosCargados)
+  // 🔹 Cargar ejercicios del backend de forma segura
+  const cargarEjercicios = async () => {
+    if (!usuario?.id) return
+    setCargando(true)
+    try {
+      const result = await dataStore.getEjercicios(usuario.id)
+      // 🔧 Validamos que el resultado sea un array
+      if (Array.isArray(result)) {
+        setEjercicios(result)
+      } else if (result && typeof result === "object") {
+        // Si viene un objeto, lo convertimos a array (por defensa)
+        setEjercicios(Object.values(result))
+      } else {
+        setEjercicios([])
+      }
+    } catch (error) {
+      console.error("❌ Error al cargar ejercicios:", error)
+      setEjercicios([])
+    } finally {
+      setCargando(false)
+    }
   }
 
   useEffect(() => {
     cargarEjercicios()
   }, [usuario])
 
-  const ejerciciosFiltrados = ejercicios.filter((ejercicio) => {
+  // Si todavía está cargando
+  if (cargando) {
+    return <p className="text-center text-muted-foreground">Cargando ejercicios...</p>
+  }
+
+  // Siempre garantizamos que sea un array
+  const ejerciciosArray = Array.isArray(ejercicios) ? ejercicios : []
+  const ejerciciosFiltrados = ejerciciosArray.filter((ejercicio) => {
     const coincideBusqueda =
-      ejercicio.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      ejercicio.descripcion.toLowerCase().includes(busqueda.toLowerCase()) ||
-      (ejercicio.subcategoria && ejercicio.subcategoria.toLowerCase().includes(busqueda.toLowerCase()))
-    const coincideGrupo = grupoActivo === "Todos" || ejercicio.grupoMuscular === grupoActivo
+      ejercicio.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      ejercicio.descripcion?.toLowerCase().includes(busqueda.toLowerCase()) ||
+      (ejercicio.subcategoria &&
+        ejercicio.subcategoria.toLowerCase().includes(busqueda.toLowerCase()))
+    const coincideGrupo =
+      grupoActivo === "Todos" || ejercicio.grupoMuscular === grupoActivo
     return coincideBusqueda && coincideGrupo
   })
 
-  const handleEliminar = (id: string) => {
+  const handleEliminar = async (id: string) => {
+    if (!id) return alert("ID inválido del ejercicio.")
+
     if (confirm("¿Eliminar este ejercicio?")) {
-      dataStore.eliminarEjercicio(id)
-      cargarEjercicios()
+      try {
+        const res = await fetch(`/api/ejercicios/${id}`, { method: "DELETE" })
+        if (!res.ok) throw new Error("No se pudo eliminar el ejercicio")
+
+        alert("✅ Ejercicio eliminado correctamente")
+        await cargarEjercicios()
+      } catch (error) {
+        console.error("❌ Error al eliminar ejercicio:", error)
+        alert("Error al eliminar el ejercicio")
+      }
     }
   }
 
@@ -91,14 +129,17 @@ export default function EjerciciosPage() {
             </Card>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {ejerciciosFiltrados.map((ejercicio) => (
-                <CardEjercicio
-                  key={ejercicio.id}
-                  ejercicio={ejercicio}
-                  onEliminar={handleEliminar}
-                  onEditar={cargarEjercicios}
-                />
-              ))}
+              {ejerciciosFiltrados.map((ejercicio, index) => {
+                const key = ejercicio.id || ejercicio._id?.toString() || `ejercicio-${index}`
+                return (
+                  <CardEjercicio
+                    key={key}
+                    ejercicio={ejercicio}
+                    onEliminar={handleEliminar}
+                    onEditar={cargarEjercicios}
+                  />
+                )
+              })}
             </div>
           )}
         </TabsContent>

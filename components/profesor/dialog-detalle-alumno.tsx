@@ -1,12 +1,21 @@
 "use client"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+
+import { useEffect, useState } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Mail, Target, Weight, Ruler, Calendar } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
-import type { Alumno } from "@/types"
+import type { Alumno, Pago, PlanEntrenamiento } from "@/types"
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden" // 👈 Agregá este import arriba
 
 interface DialogDetalleAlumnoProps {
   alumno: Alumno
@@ -15,8 +24,44 @@ interface DialogDetalleAlumnoProps {
 }
 
 export function DialogDetalleAlumno({ alumno, abierto, onCerrar }: DialogDetalleAlumnoProps) {
-  const planActual = alumno.planActualId ? dataStore.getPlan(alumno.planActualId) : null
-  const pagosAlumno = dataStore.getPagos(alumno.id)
+  const [planActual, setPlanActual] = useState<PlanEntrenamiento | null>(null)
+  const [pagosAlumno, setPagosAlumno] = useState<Pago[]>([])
+  const [cargando, setCargando] = useState(true)
+
+  // 🧩 Cargar plan y pagos al abrir el diálogo
+  useEffect(() => {
+    if (!abierto || !alumno) return
+
+    const fetchData = async () => {
+      try {
+        const pagos = await dataStore.getPagos(alumno._id?.toString() ?? alumno.id)
+        setPagosAlumno(Array.isArray(pagos) ? pagos : [])
+
+        const plan = alumno.planActualId ? await dataStore.getPlan(alumno.planActualId) : null
+        setPlanActual(plan ?? null)
+      } catch (error) {
+        console.error("❌ Error al cargar detalle del alumno:", error)
+      } finally {
+        setCargando(false)
+      }
+    }
+
+    fetchData()
+  }, [abierto, alumno])
+
+  if (cargando) {
+    return (
+      <Dialog open={abierto} onOpenChange={onCerrar}>
+        <DialogContent className="max-w-2xl text-center py-10">
+          <VisuallyHidden>
+            <DialogTitle>Cargando datos del alumno</DialogTitle>
+          </VisuallyHidden>
+          <p className="text-muted-foreground">Cargando datos del alumno...</p>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
   const pagosPendientes = pagosAlumno.filter((p) => p.estado === "pendiente")
   const pagosPagados = pagosAlumno.filter((p) => p.estado === "pagado")
   const totalPagado = pagosPagados.reduce((sum, p) => sum + p.monto, 0)
@@ -34,7 +79,9 @@ export function DialogDetalleAlumno({ alumno, abierto, onCerrar }: DialogDetalle
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20">
               <AvatarImage src={alumno.avatar || "/placeholder.svg"} alt={alumno.nombre} />
-              <AvatarFallback className="text-2xl">{alumno.nombre.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback className="text-2xl">
+                {alumno.nombre.charAt(0).toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <div>
               <h3 className="text-2xl font-bold">{alumno.nombre}</h3>

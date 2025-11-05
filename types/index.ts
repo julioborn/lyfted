@@ -1,13 +1,12 @@
 // Tipos principales de la aplicación
 
 export type TipoUsuario = "profesor" | "alumno"
-
 export type ObjetivoAlumno = "fuerza" | "masa_muscular" | "rendimiento" | "salud"
-
 export type PlanSuscripcion = "basico" | "profesional" | "premium"
 
 export interface Usuario {
-  id: string
+  _id?: string // 👈 agregado (MongoDB)
+  id?: string  // opcional por compatibilidad
   nombre: string
   dni: string
   telefono: string
@@ -43,7 +42,8 @@ export interface Profesor extends Usuario {
 }
 
 export interface Ejercicio {
-  id: string
+  _id?: string // 👈 agregado
+  id?: string
   nombre: string
   descripcion: string
   grupoMuscular: string
@@ -62,16 +62,18 @@ export interface BloqueEjercicio {
 }
 
 export interface DiaEntrenamiento {
-  id: string
-  nombre: string // "Día 1 - Pecho y Tríceps"
+  _id?: string // 👈 agregado
+  id?: string
+  nombre: string
   bloques: BloqueEjercicio[]
   completado: boolean
   fechaCompletado?: string
-  duracion?: number // en minutos
+  duracion?: number
 }
 
 export interface PlanEntrenamiento {
-  id: string
+  _id?: string // 👈 agregado
+  id?: string
   alumnoId: string
   nombre: string
   descripcion?: string
@@ -83,7 +85,8 @@ export interface PlanEntrenamiento {
 }
 
 export interface Pago {
-  id: string
+  _id?: string // 👈 agregado
+  id?: string
   alumnoId: string
   monto: number
   fecha: string
@@ -92,7 +95,8 @@ export interface Pago {
 }
 
 export interface Mensaje {
-  id: string
+  _id?: string // 👈 agregado
+  id?: string
   remitenteId: string
   destinatarioId: string
   contenido: string

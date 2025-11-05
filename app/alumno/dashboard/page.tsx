@@ -21,9 +21,9 @@ export default function DashboardAlumnoPage() {
   const [diaActualIndex, setDiaActualIndex] = useState<number | null>(null)
   const [mostrarPlan, setMostrarPlan] = useState(false)
 
-  const cargarPlan = () => {
+  const cargarPlan = async () => {
     if (alumno.planActualId) {
-      const plan = dataStore.getPlan(alumno.planActualId)
+      const plan = await dataStore.getPlan(alumno.planActualId)
       if (plan) {
         setPlanActual(plan)
         const primerDiaNoCompletado = plan.dias.findIndex((d) => !d.completado)
@@ -43,7 +43,7 @@ export default function DashboardAlumnoPage() {
     setMostrarPlan(true)
   }
 
-  const handleFinalizarSesion = (duracion: number) => {
+  const handleFinalizarSesion = async (duracion: number) => {
     if (planActual && diaActualIndex !== null) {
       const dia = planActual.dias[diaActualIndex]
       dia.completado = true
@@ -51,10 +51,13 @@ export default function DashboardAlumnoPage() {
       dia.duracion = duracion
 
       planActual.diasCompletados += 1
-      dataStore.actualizarPlan(planActual.id, {
-        dias: planActual.dias,
-        diasCompletados: planActual.diasCompletados,
-      })
+
+      if (planActual?.id) {
+        await dataStore.actualizarPlan(planActual.id, {
+          dias: planActual.dias,
+          diasCompletados: planActual.diasCompletados,
+        })
+      }
 
       setEnSesion(false)
       cargarPlan()
@@ -64,7 +67,8 @@ export default function DashboardAlumnoPage() {
   const progreso =
     planActual && planActual.totalDias > 0 ? (planActual.diasCompletados / planActual.totalDias) * 100 : 0
 
-  const pagos = dataStore.getPagos().filter((p) => p.alumnoId === alumno.id)
+  const pagosData = dataStore.getPagos()
+  const pagos = Array.isArray(pagosData) ? pagosData.filter((p) => p.alumnoId === alumno.id) : []
   const pagosPendientes = pagos.filter((p) => p.estado === "pendiente").length
 
   const menuItems = [
@@ -106,28 +110,55 @@ export default function DashboardAlumnoPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {menuItems.map((item) => {
             const Icon = item.icono
-            const Component = item.href ? Link : "button"
-            const props = item.href ? { href: item.href } : { onClick: item.onClick, disabled: item.disabled }
 
-            return (
-              <Component key={item.titulo} {...props} className="block">
-                <Card
-                  className={`${item.bgColor} border-none transition-all hover:scale-105 cursor-pointer h-full ${item.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            if (item.href) {
+              // 🔹 Caso Link
+              return (
+                <Link key={item.titulo} href={item.href} className="block">
+                  <Card
+                    className={`${item.bgColor} border-none transition-all hover:scale-105 cursor-pointer h-full`}
+                  >
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex flex-col items-center text-center gap-2 md:gap-3">
+                        <div className={`${item.color} p-3 md:p-4 rounded-full bg-white/50`}>
+                          <Icon className="h-6 w-6 md:h-8 md:w-8" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-base md:text-lg">{item.titulo}</h3>
+                          <p className="text-xs md:text-sm text-muted-foreground">{item.descripcion}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              )
+            } else {
+              // 🔹 Caso botón
+              return (
+                <button
+                  key={item.titulo}
+                  onClick={item.onClick}
+                  disabled={item.disabled}
+                  className="block w-full text-left"
                 >
-                  <CardContent className="p-4 md:p-6">
-                    <div className="flex flex-col items-center text-center gap-2 md:gap-3">
-                      <div className={`${item.color} p-3 md:p-4 rounded-full bg-white/50`}>
-                        <Icon className="h-6 w-6 md:h-8 md:w-8" />
+                  <Card
+                    className={`${item.bgColor} border-none transition-all hover:scale-105 cursor-pointer h-full ${item.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex flex-col items-center text-center gap-2 md:gap-3">
+                        <div className={`${item.color} p-3 md:p-4 rounded-full bg-white/50`}>
+                          <Icon className="h-6 w-6 md:h-8 md:w-8" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-base md:text-lg">{item.titulo}</h3>
+                          <p className="text-xs md:text-sm text-muted-foreground">{item.descripcion}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-bold text-base md:text-lg">{item.titulo}</h3>
-                        <p className="text-xs md:text-sm text-muted-foreground">{item.descripcion}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Component>
-            )
+                    </CardContent>
+                  </Card>
+                </button>
+              )
+            }
           })}
         </div>
       )}
@@ -176,13 +207,15 @@ export default function DashboardAlumnoPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-xl md:text-2xl font-bold">{planActual.totalDias - planActual.diasCompletados}</div>
+                <div className="text-xl md:text-2xl font-bold">
+                  {planActual.totalDias - planActual.diasCompletados}
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">entrenamientos</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Cronómetro de entrenamiento */}
+          {/* Cronómetro */}
           <CronometroEntrenamiento
             enSesion={enSesion}
             onIniciar={handleIniciarSesion}
@@ -202,99 +235,9 @@ export default function DashboardAlumnoPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {planActual.dias.map((dia, index) => {
-                  const esProximo = index === diaActualIndex
-                  const ejerciciosDelDia = dia.bloques.map((bloque) => dataStore.getEjercicio(bloque.ejercicioId))
-
-                  return (
-                    <Card
-                      key={dia.id}
-                      className={`${dia.completado ? "border-accent bg-accent/5" : ""} ${esProximo && !dia.completado ? "border-primary bg-primary/5" : ""}`}
-                    >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-                            <div
-                              className={`rounded-full h-8 w-8 md:h-10 md:w-10 flex items-center justify-center font-semibold text-sm shrink-0 ${
-                                dia.completado
-                                  ? "bg-accent text-accent-foreground"
-                                  : esProximo
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground"
-                              }`}
-                            >
-                              {dia.completado ? <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" /> : index + 1}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <CardTitle className="text-sm md:text-base truncate">{dia.nombre}</CardTitle>
-                              <p className="text-xs md:text-sm text-muted-foreground">
-                                {dia.bloques.length} ejercicios
-                              </p>
-                            </div>
-                          </div>
-                          {esProximo && !dia.completado && (
-                            <Badge variant="default" className="gap-1 text-xs shrink-0">
-                              <Play className="h-3 w-3" />
-                              <span className="hidden sm:inline">Próximo</span>
-                            </Badge>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {dia.bloques.map((bloque, bloqueIndex) => {
-                            const ejercicio = ejerciciosDelDia[bloqueIndex]
-
-                            return (
-                              <div
-                                key={bloqueIndex}
-                                className="flex items-center justify-between p-2 md:p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors gap-2"
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <p className="font-medium text-sm md:text-base truncate">
-                                      {ejercicio?.nombre || "Ejercicio no encontrado"}
-                                    </p>
-                                    {ejercicio?.videoUrl && (
-                                      <VideoEjercicioPreview
-                                        ejercicio={ejercicio}
-                                        trigger={
-                                          <Button variant="ghost" size="sm" className="h-6 px-2 shrink-0">
-                                            <Play className="h-3 w-3" />
-                                          </Button>
-                                        }
-                                      />
-                                    )}
-                                  </div>
-                                  <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-1 text-xs md:text-sm text-muted-foreground">
-                                    <span>{bloque.series} series</span>
-                                    <span>•</span>
-                                    <span>{bloque.repeticiones} reps</span>
-                                    {bloque.descanso && (
-                                      <>
-                                        <span>•</span>
-                                        <span>{bloque.descanso}</span>
-                                      </>
-                                    )}
-                                  </div>
-                                  {bloque.notas && (
-                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{bloque.notas}</p>
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                        {dia.completado && dia.fechaCompletado && (
-                          <div className="mt-3 pt-3 border-t text-xs md:text-sm text-muted-foreground">
-                            Completado el {new Date(dia.fechaCompletado).toLocaleDateString()}
-                            {dia.duracion && ` • Duración: ${dia.duracion} minutos`}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )
-                })}
+                {planActual.dias.map((dia, index) => (
+                  <DiaCard key={dia.id} dia={dia} index={index} diaActualIndex={diaActualIndex} />
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -313,5 +256,99 @@ export default function DashboardAlumnoPage() {
         </Card>
       )}
     </div>
+  )
+}
+
+/** 🔹 Subcomponente para renderizar los días del plan */
+async function DiaCard({ dia, index, diaActualIndex }: any) {
+  const esProximo = index === diaActualIndex
+  const ejerciciosDelDia = await Promise.all(
+    dia.bloques.map((bloque: any) => dataStore.getEjercicio(bloque.ejercicioId))
+  )
+
+  return (
+    <Card
+      className={`${dia.completado ? "border-accent bg-accent/5" : ""} ${esProximo && !dia.completado ? "border-primary bg-primary/5" : ""
+        }`}
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+            <div
+              className={`rounded-full h-8 w-8 md:h-10 md:w-10 flex items-center justify-center font-semibold text-sm shrink-0 ${dia.completado
+                  ? "bg-accent text-accent-foreground"
+                  : esProximo
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+            >
+              {dia.completado ? <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" /> : index + 1}
+            </div>
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-sm md:text-base truncate">{dia.nombre}</CardTitle>
+              <p className="text-xs md:text-sm text-muted-foreground">{dia.bloques.length} ejercicios</p>
+            </div>
+          </div>
+          {esProximo && !dia.completado && (
+            <Badge variant="default" className="gap-1 text-xs shrink-0">
+              <Play className="h-3 w-3" />
+              <span className="hidden sm:inline">Próximo</span>
+            </Badge>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        <div className="space-y-2">
+          {dia.bloques.map((bloque: any, bloqueIndex: number) => {
+            const ejercicio = ejerciciosDelDia[bloqueIndex]
+            return (
+              <div
+                key={bloqueIndex}
+                className="flex items-center justify-between p-2 md:p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors gap-2"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-sm md:text-base truncate">
+                      {ejercicio?.nombre || "Ejercicio no encontrado"}
+                    </p>
+                    {ejercicio?.videoUrl && (
+                      <VideoEjercicioPreview
+                        ejercicio={ejercicio}
+                        trigger={
+                          <Button variant="ghost" size="sm" className="h-6 px-2 shrink-0">
+                            <Play className="h-3 w-3" />
+                          </Button>
+                        }
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-1 text-xs md:text-sm text-muted-foreground">
+                    <span>{bloque.series} series</span>
+                    <span>•</span>
+                    <span>{bloque.repeticiones} reps</span>
+                    {bloque.descanso && (
+                      <>
+                        <span>•</span>
+                        <span>{bloque.descanso}</span>
+                      </>
+                    )}
+                  </div>
+                  {bloque.notas && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{bloque.notas}</p>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        {dia.completado && dia.fechaCompletado && (
+          <div className="mt-3 pt-3 border-t text-xs md:text-sm text-muted-foreground">
+            Completado el {new Date(dia.fechaCompletado).toLocaleDateString()}
+            {dia.duracion && ` • Duración: ${dia.duracion} minutos`}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

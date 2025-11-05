@@ -2,16 +2,20 @@
 
 import type React from "react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuth } from "@/lib/auth-context"
-import { Dumbbell } from "lucide-react"
-import Link from "next/link"
+import Image from "next/image"
 
-export function LoginForm() {
+type LoginFormProps = {
+  tipo: "alumno" | "profesor"
+}
+
+export function LoginForm({ tipo }: LoginFormProps) {
+  const router = useRouter()
   const [emailProfesor, setEmailProfesor] = useState("")
   const [passwordProfesor, setPasswordProfesor] = useState("")
   const [dniAlumno, setDniAlumno] = useState("")
@@ -20,138 +24,125 @@ export function LoginForm() {
   const [cargando, setCargando] = useState(false)
   const { iniciarSesion } = useAuth()
 
-  const handleSubmitProfesor = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setCargando(true)
 
-    const exito = await iniciarSesion(emailProfesor, passwordProfesor, "profesor")
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          identificador: tipo === "profesor" ? emailProfesor : dniAlumno,
+          password: tipo === "profesor" ? passwordProfesor : passwordAlumno,
+          tipo,
+        }),
+      })
 
-    if (!exito) {
-      setError("Credenciales incorrectas")
+      const data = await res.json()
+
+      if (data.requiereRegistro) {
+        router.push(`/registro/alumno?dni=${dniAlumno}`)
+        return
+      }
+
+      if (!res.ok) {
+        setError(data.error || "Error al iniciar sesión")
+        return
+      }
+
+      await iniciarSesion(
+        tipo === "profesor" ? emailProfesor : dniAlumno,
+        tipo === "profesor" ? passwordProfesor : passwordAlumno,
+        tipo
+      )
+
+      router.push(`/${tipo}/dashboard`)
+    } catch (err) {
+      setError("Error de conexión con el servidor")
+    } finally {
+      setCargando(false)
     }
-
-    setCargando(false)
-  }
-
-  const handleSubmitAlumno = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setCargando(true)
-
-    const exito = await iniciarSesion(dniAlumno, passwordAlumno, "alumno")
-
-    if (!exito) {
-      setError("DNI o contraseña incorrectos")
-    }
-
-    setCargando(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 p-6">
+      <Card className="w-full max-w-md shadow-xl border-none">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-primary text-primary-foreground p-3 rounded-full">
-              <Dumbbell className="h-8 w-8" />
+          {/* Logo redondeado */}
+          <div className="flex justify-center">
+            <div className="shadow-md shadow-[#1E3A5F]/30 rounded-full overflow-hidden">
+              <Image
+                src="/logo-lyfted.png"
+                alt="Lyfted Logo"
+                width={110}
+                height={110}
+                className="object-cover object-center scale-125 rounded-full"
+                priority
+              />
             </div>
           </div>
-          <CardTitle className="text-2xl">GymApp</CardTitle>
-          <CardDescription>Plataforma de entrenamiento personalizado</CardDescription>
+
+          <CardTitle className="text-3xl font-SEMIBOLD text-[#1E3A5F]">
+            LYFTED
+          </CardTitle>
+
+          <CardDescription className="text-gray-600 dark:text-gray-400">
+            {tipo === "profesor"
+              ? "Accedé a tu panel de gestión"
+              : "Ingresá para ver tus entrenamientos"}
+          </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <Tabs defaultValue="alumno" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="alumno">Alumno</TabsTrigger>
-              <TabsTrigger value="profesor">Profesor</TabsTrigger>
-            </TabsList>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {tipo === "profesor" ? (
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={emailProfesor}
+                  onChange={(e) => setEmailProfesor(e.target.value)}
+                  required
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>DNI</Label>
+                <Input
+                  type="text"
+                  value={dniAlumno}
+                  onChange={(e) => setDniAlumno(e.target.value)}
+                  required
+                />
+              </div>
+            )}
 
-            <TabsContent value="alumno">
-              <form onSubmit={handleSubmitAlumno} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="dni-alumno">DNI</Label>
-                  <Input
-                    id="dni-alumno"
-                    type="text"
-                    placeholder="12345678"
-                    value={dniAlumno}
-                    onChange={(e) => setDniAlumno(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-alumno">Contraseña</Label>
-                  <Input
-                    id="password-alumno"
-                    type="password"
-                    placeholder="••••••••"
-                    value={passwordAlumno}
-                    onChange={(e) => setPasswordAlumno(e.target.value)}
-                    required
-                  />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={cargando}>
-                  {cargando ? "Ingresando..." : "Iniciar Sesión"}
-                </Button>
-                <p className="text-sm text-center text-muted-foreground">
-                  ¿Primera vez?{" "}
-                  <Link href="/registro/alumno" className="text-primary hover:underline">
-                    Registrate aquí
-                  </Link>
-                </p>
-              </form>
-            </TabsContent>
+            <div className="space-y-2">
+              <Label>Contraseña</Label>
+              <Input
+                type="password"
+                value={tipo === "profesor" ? passwordProfesor : passwordAlumno}
+                onChange={(e) =>
+                  tipo === "profesor"
+                    ? setPasswordProfesor(e.target.value)
+                    : setPasswordAlumno(e.target.value)
+                }
+                required
+              />
+            </div>
 
-            <TabsContent value="profesor">
-              <form onSubmit={handleSubmitProfesor} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email-profesor">Email</Label>
-                  <Input
-                    id="email-profesor"
-                    type="email"
-                    placeholder="tu@email.com"
-                    value={emailProfesor}
-                    onChange={(e) => setEmailProfesor(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password-profesor">Contraseña</Label>
-                  <Input
-                    id="password-profesor"
-                    type="password"
-                    placeholder="••••••••"
-                    value={passwordProfesor}
-                    onChange={(e) => setPasswordProfesor(e.target.value)}
-                    required
-                  />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={cargando}>
-                  {cargando ? "Ingresando..." : "Iniciar Sesión"}
-                </Button>
-                <p className="text-sm text-center text-muted-foreground">
-                  ¿Nuevo profesor?{" "}
-                  <Link href="/registro/profesor" className="text-primary hover:underline">
-                    Registrate aquí
-                  </Link>
-                </p>
-              </form>
-            </TabsContent>
-          </Tabs>
+            {error && <p className="text-sm text-destructive">{error}</p>}
 
-          <div className="mt-6 p-4 bg-muted rounded-lg text-sm">
-            <p className="font-semibold mb-2">Usuarios de prueba:</p>
-            <p className="text-muted-foreground">
-              <strong>Profesor:</strong> profesor@gym.com
-            </p>
-            <p className="text-muted-foreground">
-              <strong>Alumno:</strong> DNI: 12345678
-            </p>
-            <p className="text-muted-foreground mt-1 text-xs">(Cualquier contraseña funciona en modo demo)</p>
-          </div>
+            <Button
+              type="submit"
+              disabled={cargando}
+              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90 transition-all font-semibold"
+            >
+              {cargando ? "Ingresando..." : "Iniciar sesión"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>

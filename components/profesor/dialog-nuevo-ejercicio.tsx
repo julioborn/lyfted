@@ -61,15 +61,27 @@ export function DialogNuevoEjercicio({ onEjercicioCreado }: { onEjercicioCreado?
     instrucciones: "",
   })
 
+  async function subirVideoACloudinary(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Error al subir video a Cloudinary");
+    const data = await res.json();
+    return data.url; // Devuelve la URL pública del video
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setCargando(true)
 
-    // Simular subida de video
     let videoUrl = ""
     if (videoFile) {
-      // En producción, aquí subirías el video a un servicio de almacenamiento
-      videoUrl = URL.createObjectURL(videoFile)
+      videoUrl = await subirVideoACloudinary(videoFile)
     }
 
     const nuevoEjercicio: Ejercicio = {
@@ -83,9 +95,8 @@ export function DialogNuevoEjercicio({ onEjercicioCreado }: { onEjercicioCreado?
       profesorId: usuario?.id || "",
     }
 
-    dataStore.agregarEjercicio(nuevoEjercicio)
+    await dataStore.agregarEjercicio(nuevoEjercicio)
 
-    // Resetear formulario
     setFormData({
       nombre: "",
       descripcion: "",
@@ -96,10 +107,7 @@ export function DialogNuevoEjercicio({ onEjercicioCreado }: { onEjercicioCreado?
     setVideoFile(null)
     setCargando(false)
     setAbierto(false)
-
-    if (onEjercicioCreado) {
-      onEjercicioCreado()
-    }
+    onEjercicioCreado?.()
   }
 
   return (

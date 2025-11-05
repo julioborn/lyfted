@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dumbbell, ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { dataStore } from "@/lib/data-store"
 
 export default function RegistroAlumnoPage() {
   const router = useRouter()
@@ -17,11 +16,13 @@ export default function RegistroAlumnoPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
+  const [mensaje, setMensaje] = useState("")
   const [cargando, setCargando] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setMensaje("")
 
     if (password !== confirmPassword) {
       setError("Las contraseñas no coinciden")
@@ -35,29 +36,26 @@ export default function RegistroAlumnoPage() {
 
     setCargando(true)
 
-    // Validar que el DNI existe en la base de datos (dado de alta por el profesor)
-    const alumnoExistente = dataStore.obtenerAlumnoPorDni(dni)
+    try {
+      const res = await fetch("/api/auth/completar-registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dni, password }),
+      })
 
-    if (!alumnoExistente) {
-      setError("DNI no encontrado. Contacta a tu profesor para que te dé de alta.")
-      setCargando(false)
-      return
-    }
+      const data = await res.json()
 
-    if (alumnoExistente.password) {
-      setError("Este DNI ya está registrado. Inicia sesión en su lugar.")
-      setCargando(false)
-      return
-    }
-
-    // Registrar al alumno con su contraseña
-    const registroExitoso = await dataStore.registrarAlumno(dni, password)
-
-    if (registroExitoso) {
-      // Redirigir al formulario de bienvenida para completar datos
-      router.push(`/bienvenida/alumno?dni=${dni}`)
-    } else {
-      setError("Error al registrar. Intenta nuevamente.")
+      if (res.ok) {
+        setMensaje("Registro completado correctamente. Redirigiendo...")
+        setTimeout(() => {
+          router.push("/login/alumno")
+        }, 1500)
+      } else {
+        setError(data.error || "Error al registrar. Intenta nuevamente.")
+      }
+    } catch (err) {
+      console.error("Error al registrar alumno:", err)
+      setError("Error al conectar con el servidor")
     }
 
     setCargando(false)
@@ -68,13 +66,14 @@ export default function RegistroAlumnoPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="bg-primary text-primary-foreground p-3 rounded-full">
+            <div className="bg-primary text-primary-foreground p-3 rounded-full shadow-md">
               <Dumbbell className="h-8 w-8" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Registro de Alumno</CardTitle>
+          <CardTitle className="text-2xl font-bold">Registro de Alumno</CardTitle>
           <CardDescription>Ingresa tu DNI y crea tu contraseña</CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -87,7 +86,7 @@ export default function RegistroAlumnoPage() {
                 onChange={(e) => setDni(e.target.value)}
                 required
               />
-              <p className="text-xs text-muted-foreground">Ingresa el DNI que tu profesor registró para ti</p>
+              <p className="text-xs text-muted-foreground">Debe coincidir con el DNI que registró tu profesor</p>
             </div>
 
             <div className="space-y-2">
@@ -115,9 +114,10 @@ export default function RegistroAlumnoPage() {
             </div>
 
             {error && <p className="text-sm text-destructive">{error}</p>}
+            {mensaje && <p className="text-sm text-green-600">{mensaje}</p>}
 
             <Button type="submit" className="w-full" disabled={cargando}>
-              {cargando ? "Registrando..." : "Registrarse"}
+              {cargando ? "Registrando..." : "Registrar"}
             </Button>
 
             <div className="text-center">

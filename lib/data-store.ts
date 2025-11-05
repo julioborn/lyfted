@@ -1,6 +1,6 @@
 "use client"
 
-import type { Ejercicio, PlanEntrenamiento, Pago, Mensaje, Alumno, Profesor, Entrenamiento } from "@/types"
+import type { Ejercicio, PlanEntrenamiento, Pago, Mensaje, Alumno, Profesor, DiaEntrenamiento as Entrenamiento } from "@/types"
 
 // Store simple para datos mock - en producción esto sería una base de datos
 
@@ -222,9 +222,14 @@ class DataStore {
     try {
       const url = profesorId ? `/api/alumnos?profesorId=${profesorId}` : "/api/alumnos"
       const response = await fetch(url)
-      if (response.ok) {
-        return await response.json()
-      }
+      if (!response.ok) return []
+
+      const data = await response.json()
+
+      // 🧠 Si la API devuelve { alumnos: [...] }, usamos data.alumnos
+      if (Array.isArray(data)) return data
+      if (Array.isArray(data.alumnos)) return data.alumnos
+
       return []
     } catch (error) {
       console.error("Error al obtener alumnos:", error)
