@@ -142,7 +142,7 @@ export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
         </div>
 
         <h1 className="text-center text-3xl font-semibold text-[#1E3A5F] mb-6">
-          {tipo === "profesor" ? "Acceso Profesor" : "Acceso Alumno"}
+          {tipo === "profesor" ? "Acceso Entrenador" : "Acceso Alumno"}
         </h1>
 
         {/* --- FASE INICIAL: ELEGIR LOGIN O REGISTRO --- */}
