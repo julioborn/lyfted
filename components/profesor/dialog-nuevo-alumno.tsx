@@ -38,6 +38,7 @@ const usuario = session?.user
       id: `alumno${Date.now()}`,
       nombre: formData.nombre,
       dni: formData.dni,
+      telefono: "",
       tipo: "alumno",
       profesorId: usuario?.id || "",
       registroCompleto: false, // Indica que el alumno aún no completó su registro
