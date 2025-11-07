@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,8 @@ import type { PlanEntrenamiento, Alumno } from "@/types"
 import Link from "next/link"
 
 export default function DashboardAlumnoPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const alumno = usuario as Alumno
   const [planActual, setPlanActual] = useState<PlanEntrenamiento | null>(null)
   const [enSesion, setEnSesion] = useState(false)
@@ -89,14 +90,14 @@ export default function DashboardAlumnoPage() {
       color: "text-green-600",
       bgColor: "bg-green-50 hover:bg-green-100",
     },
-    {
-      titulo: "Mensajes",
-      descripcion: "Contactar",
-      icono: MessageCircle,
-      href: "/alumno/mensajes",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50 hover:bg-purple-100",
-    },
+    // {
+    //   titulo: "Mensajes",
+    //   descripcion: "Contactar",
+    //   icono: MessageCircle,
+    //   href: "/alumno/mensajes",
+    //   color: "text-purple-600",
+    //   bgColor: "bg-purple-50 hover:bg-purple-100",
+    // },
   ]
 
   return (

@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, Clock, PlusCircle, DollarSign, UserPlus, Dumbbell } from "lucide-react"
@@ -9,15 +9,17 @@ import { useEffect, useState } from "react"
 import type { Alumno, PlanEntrenamiento, Pago } from "@/types"
 
 export default function DashboardProfesorPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+  const usuario = session?.user // ✅ Aquí está el usuario logueado
+
   const [alumnos, setAlumnos] = useState<Alumno[]>([])
   const [pagos, setPagos] = useState<Pago[]>([])
   const [planes, setPlanes] = useState<PlanEntrenamiento[]>([])
   const [cargando, setCargando] = useState(true)
 
-  // 🧩 Cargar datos cuando el usuario esté listo
+  // 🧩 Cargar datos cuando haya sesión válida
   useEffect(() => {
-    if (!usuario) return
+    if (status === "loading" || !usuario) return
 
     const fetchData = async () => {
       try {
@@ -30,18 +32,20 @@ export default function DashboardProfesorPage() {
         setPagos(pagosData)
         setPlanes(planesData)
       } catch (error) {
-        console.error("Error al cargar datos del dashboard:", error)
+        console.error("❌ Error al cargar datos del dashboard:", error)
       } finally {
         setCargando(false)
       }
     }
 
     fetchData()
-  }, [usuario])
+  }, [usuario, status])
 
-  if (cargando) return <p>Cargando...</p>
+  if (status === "loading" || cargando) {
+    return <p className="p-6 text-center text-gray-600">Cargando...</p>
+  }
 
-  // 🧠 Calcular planes a renovar (solo si hay fechaFin válida)
+  // 🧠 Calcular planes a renovar
   const planesARenovar = planes.filter((plan) => {
     if (!plan?.fechaFin) return false
     const diasRestantes = Math.ceil(
@@ -105,11 +109,11 @@ export default function DashboardProfesorPage() {
   ]
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-6 p-6">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold">Panel de Control</h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          Bienvenido, {usuario?.nombre}
+          Bienvenido, {usuario?.nombre || "Profesor"}
         </p>
       </div>
 

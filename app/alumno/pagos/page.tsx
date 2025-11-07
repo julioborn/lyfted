@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -9,7 +9,8 @@ import { CheckCircle2, AlertCircle, Clock } from "lucide-react"
 import type { Pago, Alumno } from "@/types"
 
 export default function PagosAlumnoPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const alumno = usuario as Alumno
   const [pagos, setPagos] = useState<Pago[]>([])
 

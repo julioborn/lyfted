@@ -16,11 +16,12 @@ import {
 } from "@/components/ui/dialog"
 import { UserPlus } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import type { Alumno } from "@/types"
 
 export function DialogNuevoAlumno({ onAlumnoCreado }: { onAlumnoCreado?: () => void }) {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const [abierto, setAbierto] = useState(false)
   const [cargando, setCargando] = useState(false)
 

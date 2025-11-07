@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,8 @@ import { ChatMensaje } from "@/components/chat/chat-mensaje"
 import type { Alumno, Mensaje, Profesor } from "@/types"
 
 export default function MensajesAlumnoPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const alumno = usuario as Alumno
   const [profesor, setProfesor] = useState<Profesor | null>(null)
   const [mensajes, setMensajes] = useState<Mensaje[]>([])

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,8 @@ import { DialogNuevoPago } from "@/components/profesor/dialog-nuevo-pago"
 import type { Pago } from "@/types"
 
 export default function PagosPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const [pagos, setPagos] = useState<Pago[]>([])
   const [busqueda, setBusqueda] = useState("")
   const [filtroEstado, setFiltroEstado] = useState<"todos" | "pendiente" | "pagado" | "vencido">("todos")

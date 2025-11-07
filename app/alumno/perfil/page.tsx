@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,8 @@ import type { Alumno } from "@/types"
 import { dataStore } from "@/lib/data-store"
 
 export default function PerfilAlumnoPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const alumno = usuario as Alumno
   const [editando, setEditando] = useState(false)
   const [cargando, setCargando] = useState(false)

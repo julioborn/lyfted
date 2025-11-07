@@ -11,7 +11,7 @@ const AlumnoSchema = new Schema(
     genero: { type: String, enum: ["masculino", "femenino", "otro"] },
     objetivoPrincipal: {
       type: String,
-      enum: ["fuerza", "masa_muscular", "rendimiento", "salud"],
+      enum: ["fuerza", "masa muscular", "rendimiento", "salud"],
     },
     lesiones: { type: String },
     profesorId: { type: Schema.Types.ObjectId, ref: "Profesor", required: true },

@@ -73,17 +73,6 @@ export function Inicio() {
                     </Button>
                 </div>
             </motion.div>
-
-            {/* Pie */}
-            <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8 }}
-                className="mt-24 text-sm text-gray-400 dark:text-gray-500"
-            >
-                © {new Date().getFullYear()}{" "}
-                <span className="font-semibold text-[#1E3A5F] dark:text-gray-300">Lyfted</span> — Todos los derechos reservados
-            </motion.p>
         </div>
     )
 }

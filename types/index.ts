@@ -25,7 +25,7 @@ export interface Alumno extends Usuario {
   peso?: number
   altura?: number
   planActualId?: string
-  datosCompletados?: boolean // Para saber si completó el formulario inicial
+  registroCompleto: boolean // 👈 ahora coincide con backend y front
 }
 
 export interface Profesor extends Usuario {

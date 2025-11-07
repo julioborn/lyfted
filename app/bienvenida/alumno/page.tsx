@@ -11,12 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dumbbell } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 
 export default function BienvenidaAlumnoPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { iniciarSesion } = useAuth()
+  const { iniciarSesion } = const { data: session } = useSession()
   const dni = searchParams.get("dni")
 
   const [cargando, setCargando] = useState(false)

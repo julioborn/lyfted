@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LayoutDashboard, Users, Dumbbell, Calendar, DollarSign, MessageSquare } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 
 const menuItems = [
@@ -43,7 +43,8 @@ const menuItems = [
 
 export function SidebarProfesor() {
   const pathname = usePathname()
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const mensajesNoLeidos = usuario
     ? dataStore.getMensajes(usuario.id).filter((m) => m.destinatarioId === usuario.id && !m.leido).length
     : 0

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -26,7 +26,8 @@ const gruposMusculares = [
 ]
 
 export default function EjerciciosPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const [busqueda, setBusqueda] = useState("")
   const [grupoActivo, setGrupoActivo] = useState("Todos")
   const [ejercicios, setEjercicios] = useState<Ejercicio[]>([])

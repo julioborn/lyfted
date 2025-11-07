@@ -19,7 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import type { Pago } from "@/types"
 
 interface DialogNuevoPagoProps {
@@ -27,7 +27,8 @@ interface DialogNuevoPagoProps {
 }
 
 export function DialogNuevoPago({ onPagoCreado }: DialogNuevoPagoProps) {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const [abierto, setAbierto] = useState(false)
   const [cargando, setCargando] = useState(false)
 

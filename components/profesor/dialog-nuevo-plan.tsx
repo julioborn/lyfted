@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus, Trash2 } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 
 interface Alumno {
   _id: string
@@ -21,7 +21,8 @@ interface Ejercicio {
 }
 
 export function DialogNuevoPlan({ onPlanCreado }: { onPlanCreado?: () => void }) {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const [abierto, setAbierto] = useState(false)
   const [nombre, setNombre] = useState("")
   const [alumnoId, setAlumnoId] = useState("")

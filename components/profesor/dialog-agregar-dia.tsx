@@ -18,7 +18,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
 import { dataStore } from "@/lib/data-store"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import type { DiaEntrenamiento, BloqueEjercicio } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -28,7 +28,8 @@ interface DialogAgregarDiaProps {
 }
 
 export function DialogAgregarDia({ planId, onDiaAgregado }: DialogAgregarDiaProps) {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const [abierto, setAbierto] = useState(false)
   const [cargando, setCargando] = useState(false)
 

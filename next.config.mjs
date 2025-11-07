@@ -6,6 +6,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    runtime: "nodejs", // 👈 fuerza que Next use el runtime Node.js
+  },
 }
 
 export default nextConfig

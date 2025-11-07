@@ -1,25 +1,29 @@
 "use client"
 
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Inicio } from "@/components/Inicio"
 
 export default function HomePage() {
-  const { usuario, cargando } = useAuth()
+  const { data: session, status } = useSession()
   const router = useRouter()
 
+  // 🚀 Redirección automática si el usuario ya está autenticado
   useEffect(() => {
-    if (!cargando && usuario) {
-      if (usuario.tipo === "profesor") {
+    if (status === "loading") return
+
+    if (status === "authenticated" && session?.user) {
+      if (session.user.tipo === "profesor") {
         router.push("/profesor/dashboard")
       } else {
         router.push("/alumno/dashboard")
       }
     }
-  }, [usuario, cargando, router])
+  }, [status, session, router])
 
-  if (cargando) {
+  // ⏳ Estado de carga
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -30,9 +34,9 @@ export default function HomePage() {
     )
   }
 
-  // Si hay usuario, no mostramos nada (redirige)
-  if (usuario) return null
+  // 👤 Si hay sesión, no mostramos nada (porque redirige)
+  if (status === "authenticated") return null
 
-  // Si no hay usuario, mostramos la nueva pantalla de inicio
+  // 🏠 Si no hay usuario, mostramos la página de inicio
   return <Inicio />
 }

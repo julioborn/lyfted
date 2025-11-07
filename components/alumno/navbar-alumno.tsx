@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuth } from "@/lib/auth-context"
+import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -12,28 +12,32 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Dumbbell, LogOut, Menu, Home, DollarSign, MessageCircle, User } from "lucide-react"
+import { Dumbbell, LogOut, Menu, Home, Calendar, DollarSign, MessageCircle } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 const rutasAlumno = [
   { ruta: "/alumno/dashboard", nombre: "Inicio", icono: Home },
-  { ruta: "/alumno/perfil", nombre: "Mi Perfil", icono: User },
-  { ruta: "/alumno/pagos", nombre: "Mis Pagos", icono: DollarSign },
-  { ruta: "/alumno/mensajes", nombre: "Mensajes", icono: MessageCircle },
+  { ruta: "/alumno/planes", nombre: "Mis Planes", icono: Dumbbell },
+  { ruta: "/alumno/pagos", nombre: "Pagos", icono: DollarSign },
+  // { ruta: "/alumno/mensajes", nombre: "Mensajes", icono: MessageCircle },
+  { ruta: "/alumno/asistencias", nombre: "Asistencias", icono: Calendar },
 ]
 
 export function NavbarAlumno() {
-  const { usuario, cerrarSesion } = useAuth()
+  const { data: session } = useSession()
+  const usuario = session?.user
   const pathname = usePathname()
 
+  const cerrarSesion = () => signOut({ callbackUrl: "/login" })
+
   return (
-    <nav className="border-b bg-card sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <nav className="bg-[#1E3A5F] text-white sticky top-0 z-50 shadow-md">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
@@ -45,12 +49,16 @@ export function NavbarAlumno() {
               {rutasAlumno.map((item) => {
                 const Icono = item.icono
                 const esActiva = pathname.startsWith(item.ruta)
-
                 return (
                   <Link key={item.ruta} href={item.ruta}>
                     <Button
                       variant={esActiva ? "default" : "ghost"}
-                      className={cn("w-full justify-start gap-3", esActiva && "bg-primary text-primary-foreground")}
+                      className={cn(
+                        "w-full justify-start gap-3",
+                        esActiva
+                          ? "bg-[#1E3A5F] text-white"
+                          : "hover:bg-[#1E3A5F]/10 hover:text-[#1E3A5F]"
+                      )}
                     >
                       <Icono className="h-5 w-5" />
                       <span>{item.nombre}</span>
@@ -62,20 +70,19 @@ export function NavbarAlumno() {
           </SheetContent>
         </Sheet>
 
-        <Link href="/alumno/dashboard" className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2">
-          <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-            <Dumbbell className="h-5 w-5" />
-          </div>
-          <span className="font-bold text-lg hidden sm:inline">Mi Entrenamiento</span>
+        <Link
+          href="/alumno/dashboard"
+          className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2"
+        >
+          {/* <span className="font-bold text-lg tracking-wide">Lyfted</span> */}
         </Link>
 
-        {/* Avatar a la derecha */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full text-white">
               <Avatar>
-                <AvatarImage src={usuario?.avatar || "/placeholder.svg"} alt={usuario?.nombre} />
-                <AvatarFallback>{usuario?.nombre.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={usuario?.image || "/placeholder.svg"} alt={usuario?.nombre || "Alumno"} />
+                <AvatarFallback>{usuario?.nombre?.charAt(0).toUpperCase() || "A"}</AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
@@ -87,12 +94,6 @@ export function NavbarAlumno() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/alumno/perfil">
-                <User className="mr-2 h-4 w-4" />
-                <span>Mi Perfil</span>
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={cerrarSesion}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Cerrar Sesión</span>

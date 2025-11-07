@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,7 +13,8 @@ import { DialogDetalleAlumno } from "@/components/profesor/dialog-detalle-alumno
 import type { Alumno, PlanEntrenamiento, Pago } from "@/types"
 
 export default function AlumnosPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const [busqueda, setBusqueda] = useState("")
   const [alumnos, setAlumnos] = useState<Alumno[]>([])
   const [pagos, setPagos] = useState<Record<string, Pago[]>>({})

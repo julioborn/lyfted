@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,7 +12,8 @@ import type { PlanEntrenamiento } from "@/types"
 import Link from "next/link"
 
 export default function PlanesPage() {
-  const { usuario } = useAuth()
+  const { data: session, status } = useSession()
+const usuario = session?.user
   const [planes, setPlanes] = useState<(PlanEntrenamiento & { alumnoNombre?: string })[]>([])
   const [cargando, setCargando] = useState(true)
 
