@@ -226,3 +226,11 @@
 //     </Dialog>
 //   )
 // }
+
+
+"use client"
+
+// temporalmente desactivado
+export function DialogAgregarDia() {
+  return null
+}

@@ -108,6 +108,8 @@ export default function DashboardProfesorPage() {
     },
   ]
 
+  console.log("🧩 Card:", Card)
+
   return (
     <div className="space-y-4 md:space-y-6 p-6">
       <div>

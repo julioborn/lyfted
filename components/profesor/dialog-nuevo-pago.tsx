@@ -176,3 +176,10 @@
 //     </Dialog>
 //   )
 // }
+
+"use client"
+
+// temporalmente desactivado
+export function DialogNuevoPago() {
+  return null
+}

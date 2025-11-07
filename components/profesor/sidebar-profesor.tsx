@@ -1,83 +1,26 @@
-// "use client"
+"use client"
 
-// import Link from "next/link"
-// import { usePathname } from "next/navigation"
-// import { cn } from "@/lib/utils"
-// import { LayoutDashboard, Users, Dumbbell, Calendar, DollarSign, MessageSquare } from "lucide-react"
-// import { Badge } from "@/components/ui/badge"
-// import { useSession } from "next-auth/react"
-// import { dataStore } from "@/lib/data-store"
+import Link from "next/link"
+import { Dumbbell, Users, DollarSign, LogOut } from "lucide-react"
 
-// const menuItems = [
-//   {
-//     titulo: "Dashboard",
-//     href: "/profesor/dashboard",
-//     icon: LayoutDashboard,
-//   },
-//   {
-//     titulo: "Alumnos",
-//     href: "/profesor/alumnos",
-//     icon: Users,
-//   },
-//   {
-//     titulo: "Ejercicios",
-//     href: "/profesor/ejercicios",
-//     icon: Dumbbell,
-//   },
-//   {
-//     titulo: "Planes",
-//     href: "/profesor/planes",
-//     icon: Calendar,
-//   },
-//   {
-//     titulo: "Pagos",
-//     href: "/profesor/pagos",
-//     icon: DollarSign,
-//   },
-//   {
-//     titulo: "Mensajes",
-//     href: "/profesor/mensajes",
-//     icon: MessageSquare,
-//   },
-// ]
-
-// export function SidebarProfesor() {
-//   const pathname = usePathname()
-//   const { data: session, status } = useSession()
-// const usuario = session?.user
-//   const mensajesNoLeidos = usuario
-//     ? dataStore.getMensajes(usuario.id).filter((m) => m.destinatarioId === usuario.id && !m.leido).length
-//     : 0
-
-//   return (
-//     <aside className="w-64 border-r bg-card min-h-[calc(100vh-57px)] p-4">
-//       <nav className="space-y-2">
-//         {menuItems.map((item) => {
-//           const Icon = item.icon
-//           const isActive = pathname === item.href
-
-//           return (
-//             <Link
-//               key={item.href}
-//               href={item.href}
-//               className={cn(
-//                 "flex items-center justify-between gap-3 px-3 py-2 rounded-lg transition-colors",
-//                 isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent hover:text-accent-foreground",
-//               )}
-//             >
-//               <div className="flex items-center gap-3">
-//                 <Icon className="h-5 w-5" />
-//                 <span className="font-medium">{item.titulo}</span>
-//               </div>
-//               {item.href === "/profesor/mensajes" && mensajesNoLeidos > 0 && (
-//                 <Badge variant={isActive ? "secondary" : "default"} className="h-5 min-w-5 px-1">
-//                   {mensajesNoLeidos}
-//                 </Badge>
-//               )}
-//             </Link>
-//           )
-//         })}
-//       </nav>
-//     </aside>
-//   )
-// }
+export function SidebarProfesor() {
+    return (
+        <aside className="w-60 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 p-4 flex flex-col">
+            <h2 className="text-xl font-bold mb-6">Panel Profesor</h2>
+            <nav className="flex flex-col gap-3">
+                <Link href="/profesor/dashboard" className="flex items-center gap-2 hover:text-blue-600">
+                    <Dumbbell className="w-4 h-4" /> Dashboard
+                </Link>
+                <Link href="/profesor/alumnos" className="flex items-center gap-2 hover:text-blue-600">
+                    <Users className="w-4 h-4" /> Alumnos
+                </Link>
+                <Link href="/profesor/pagos" className="flex items-center gap-2 hover:text-blue-600">
+                    <DollarSign className="w-4 h-4" /> Pagos
+                </Link>
+                <Link href="/login" className="flex items-center gap-2 mt-auto text-red-500 hover:text-red-600">
+                    <LogOut className="w-4 h-4" /> Cerrar sesión
+                </Link>
+            </nav>
+        </aside>
+    )
+}
