@@ -16,7 +16,7 @@ import { useSession } from "next-auth/react"
 export default function BienvenidaAlumnoPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { iniciarSesion } = const { data: session } = useSession()
+  const { data: session } = useSession()
   const dni = searchParams.get("dni")
 
   const [cargando, setCargando] = useState(false)
