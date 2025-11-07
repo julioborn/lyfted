@@ -30,7 +30,7 @@ export default function ProfesorLayout({
       </div>
     )
   }
-
+//hola
   return (
     <div className="min-h-screen flex flex-col">
       <NavbarProfesor /> {/* 👈 acá */}
