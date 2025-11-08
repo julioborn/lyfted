@@ -10,7 +10,7 @@ export default function LoginSelectorPage() {
     const router = useRouter()
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-start pt-20 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 p-6">
+        <div className="h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 p-6">
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -56,7 +56,7 @@ export default function LoginSelectorPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.5 }}
-                    className="flex flex-row justify-center items-center gap-5 mt-6 flex-wrap"
+                    className="flex flex-row justify-center items-center gap-5 flex-wrap mt-6"
                 >
                     {/* Botón Entrenador */}
                     <div className="relative flex flex-col items-center">
