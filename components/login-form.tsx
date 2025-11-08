@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Image from "next/image"
 import RegistroPorPasos from "./RegistroPorPasos"
+import RegistroProfesorPorPasos from "./profesor/RegistroProfesorPorPasos"
 
 export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
   const router = useRouter()
@@ -25,6 +26,10 @@ export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
   const [loading, setLoading] = useState(false)
   const [alumnoEncontrado, setAlumnoEncontrado] = useState<any>(null)
   const [fase, setFase] = useState<"inicio" | "login" | "buscar" | "registro">("inicio")
+  const [dni, setDni] = useState("")
+  const [nombreGimnasio, setNombreGimnasio] = useState("")
+  const [ciudad, setCiudad] = useState("")
+  const [provincia, setProvincia] = useState("")
 
   // --- BUSCAR ALUMNO ---
   const handleBuscarAlumno = async (e: React.FormEvent) => {
@@ -238,7 +243,7 @@ export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
         )}
 
         {/* --- FASE DE REGISTRO COMPLETO --- */}
-        {fase === "registro" && (
+        {fase === "registro" && tipo === "alumno" && (
           <div className="w-full">
             <RegistroPorPasos
               alumnoEncontrado={alumnoEncontrado}
@@ -248,13 +253,190 @@ export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
           </div>
         )}
 
-        {/* --- LOGIN PARA PROFESOR --- */}
-        {tipo === "profesor" && (
-          <form onSubmit={handleLogin} className="space-y-4">
+        {fase === "registro" && tipo === "profesor" && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              setError("")
+              setLoading(true)
+
+              try {
+                const res = await fetch("/api/profesores/registro", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    nombre: identificador,
+                    dni,
+                    telefono,
+                    password,
+                    email,
+                    nombreGimnasio,
+                    ciudad,
+                    provincia,
+                  }),
+                })
+
+                const data = await res.json()
+
+                if (!res.ok) {
+                  Swal.fire("❌", data.error || "Error al crear el entrenador", "error")
+                  setLoading(false)
+                  return
+                }
+
+                // ✅ Inicia sesión automáticamente después del registro
+                await signIn("credentials", {
+                  redirect: false,
+                  identificador: dni,
+                  password,
+                  tipo: "profesor",
+                })
+
+                Swal.fire("✅", "Entrenador registrado correctamente", "success").then(() => {
+                  router.replace("/profesor/bienvenida")
+                })
+
+                router.push("/profesor/dashboard")
+              } catch (err) {
+                console.error(err)
+                Swal.fire("❌", "Error interno del servidor", "error")
+              } finally {
+                setLoading(false)
+              }
+            }}
+            className="space-y-4"
+          >
             <div>
-              <Label>Email</Label>
+              <Label>Nombre y Apellido</Label>
+              <Input
+                type="text"
+                value={identificador}
+                onChange={(e) => setIdentificador(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <Label>DNI</Label>
+              <Input
+                type="text"
+                value={dni}
+                onChange={(e) => setDni(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Teléfono</Label>
+              <Input
+                type="text"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label>Correo electrónico</Label>
               <Input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Nombre del gimnasio o marca personal</Label>
+              <Input
+                type="text"
+                value={nombreGimnasio}
+                onChange={(e) => setNombreGimnasio(e.target.value)}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Label>Ciudad</Label>
+                <Input
+                  type="text"
+                  value={ciudad}
+                  onChange={(e) => setCiudad(e.target.value)}
+                />
+              </div>
+              <div className="flex-1">
+                <Label>Provincia</Label>
+                <Input
+                  type="text"
+                  value={provincia}
+                  onChange={(e) => setProvincia(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label>Contraseña</Label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Confirmar contraseña</Label>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && <p className="text-sm text-red-500">{error}</p>}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
+            >
+              {loading ? "Registrando..." : "Registrarme como entrenador"}
+            </Button>
+
+            <p
+              className="text-center text-sm text-[#1E3A5F] mt-2 cursor-pointer hover:underline"
+              onClick={() => setFase("inicio")}
+            >
+              ← Volver
+            </p>
+          </form>
+        )}
+
+        {/* --- FASE INICIAL: ELEGIR LOGIN O REGISTRO (PROFESOR) --- */}
+        {fase === "inicio" && tipo === "profesor" && (
+          <div className="flex flex-col gap-4">
+            <Button
+              onClick={() => setFase("login")}
+              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
+            >
+              Iniciar sesión
+            </Button>
+            <Button
+              onClick={() => setFase("registro")}
+              className="w-full bg-white border text-[#1E3A5F] hover:bg-slate-100"
+            >
+              Registrarme
+            </Button>
+          </div>
+        )}
+
+        {/* --- LOGIN DIRECTO PROFESOR --- */}
+        {fase === "login" && tipo === "profesor" && (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <Label>DNI</Label>
+              <Input
+                type="text"
                 value={identificador}
                 onChange={(e) => setIdentificador(e.target.value)}
                 required
@@ -280,6 +462,13 @@ export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
             >
               {loading ? "Ingresando..." : "Iniciar sesión"}
             </Button>
+
+            <p
+              className="text-center text-sm text-[#1E3A5F] mt-2 cursor-pointer hover:underline"
+              onClick={() => setFase("inicio")}
+            >
+              ← Volver
+            </p>
           </form>
         )}
 

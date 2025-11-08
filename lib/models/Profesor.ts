@@ -1,4 +1,9 @@
-import { Schema, model, models } from "mongoose"
+import { Schema, model, models, deleteModel } from "mongoose"
+
+// 💥 eliminar modelo viejo si ya existe en memoria (para hot reload)
+if (models.Profesor) {
+  deleteModel("Profesor")
+}
 
 const ProfesorSchema = new Schema(
   {
@@ -11,19 +16,15 @@ const ProfesorSchema = new Schema(
     ciudad: { type: String },
     provincia: { type: String },
     fechaAlta: { type: Date, default: Date.now },
-    planSuscripcion: {
-      type: String,
-      enum: ["basico", "profesional", "premium"],
-      default: "basico",
-    },
-    metodoPago: { type: String },
+    planSuscripcion: { type: String, default: "unico" },
+    metodoPago: { type: String, default: "ninguno" },
     limiteAlumnos: { type: Number, default: 10 },
     avatar: { type: String },
     activo: { type: Boolean, default: true },
+    registroCompleto: { type: Boolean, default: true },
+    tipo: { type: String, default: "profesor" },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true }
 )
 
-export default models.Profesor || model("Profesor", ProfesorSchema)
+export default model("Profesor", ProfesorSchema)

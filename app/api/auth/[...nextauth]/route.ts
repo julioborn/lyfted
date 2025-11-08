@@ -25,8 +25,10 @@ const handler = NextAuth({
                 if (!identificador || !password || !tipo) return null
 
                 if (tipo === "profesor") {
-                    const profesor = await Profesor.findOne({ email: identificador })
+                    // 🔍 Buscar profesor por DNI (no por email)
+                    const profesor = await Profesor.findOne({ dni: identificador })
                     if (!profesor) return null
+
                     const ok = await bcrypt.compare(password, profesor.password)
                     if (!ok) return null
 
@@ -34,10 +36,10 @@ const handler = NextAuth({
                         id: profesor._id.toString(),
                         nombre: profesor.nombre,
                         tipo: "profesor",
-                        // para profesores no usamos registroCompleto
+                        dni: profesor.dni,
                         registroCompleto: true,
                         email: profesor.email ?? null,
-                        image: profesor.image ?? null,
+                        image: profesor.avatar ?? null,
                     }
                 }
 

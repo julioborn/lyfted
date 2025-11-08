@@ -2,7 +2,7 @@
 
 export type TipoUsuario = "profesor" | "alumno"
 export type ObjetivoAlumno = "fuerza" | "masa_muscular" | "rendimiento" | "salud"
-export type PlanSuscripcion = "basico" | "profesional" | "premium"
+export type PlanSuscripcion = "unico"
 
 export interface Usuario {
   _id?: string // 👈 agregado (MongoDB)
@@ -21,11 +21,14 @@ export interface Alumno extends Usuario {
   fechaNacimiento?: string
   genero?: "masculino" | "femenino" | "otro"
   objetivo?: ObjetivoAlumno
-  lesiones?: string
+  objetivoPrincipal?: string        // 👈 agregado
+  lesiones?: string                 // 👈 agregado
   peso?: number
   altura?: number
   planActualId?: string
-  registroCompleto: boolean // 👈 ahora coincide con backend y front
+  registroCompleto: boolean
+  activo?: boolean                  // 👈 ya que aparece en tu documento
+  fechaCreacion?: string            // opcional si querés mapear createdAt
 }
 
 export interface Profesor extends Usuario {
@@ -34,11 +37,13 @@ export interface Profesor extends Usuario {
   nombreGimnasio?: string
   ciudad?: string
   provincia?: string
-  fechaAlta: string
-  planSuscripcion: PlanSuscripcion
-  metodoPago?: string
-  limiteAlumnos: number
-  logo?: string
+  fechaAlta?: string                // 👉 opcional, se autocompleta al registrar
+  planSuscripcion?: PlanSuscripcion // 👉 opcional para el primer registro
+  metodoPago?: string               // 👉 por ahora vacío
+  limiteAlumnos?: number            // 👉 opcional (definí luego según plan)
+  logo?: string                     // 👉 para subir foto o logo
+  registroCompleto: boolean         // 👈 agregado para igualar comportamiento con Alumno
+  activo?: boolean                  // 👈 opcional por si querés habilitar/deshabilitar cuentas
 }
 
 export interface Ejercicio {
