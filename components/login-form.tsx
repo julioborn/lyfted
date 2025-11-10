@@ -140,8 +140,8 @@ export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      <div className="w-full max-w-md shadow-xl border-none bg-white p-6 rounded-xl">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 p-6">
+      <div className="w-full max-w-md bg-transparent p-0 shadow-none">
         <div className="flex justify-center mb-4">
           <Image src="/logo-lyfted.png" alt="Lyfted Logo" width={100} height={100} priority />
         </div>
