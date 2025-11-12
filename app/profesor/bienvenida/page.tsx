@@ -41,7 +41,7 @@ export default function BienvenidaProfesor() {
                 transition={{ delay: 0.8, duration: 0.8 }}
                 className="text-gray-600 max-w-md mb-8 text-lg leading-relaxed"
             >
-                Tu gimnasio, tus alumnos y tu marca en un solo lugar.
+                ¿Listo para llevar tus planificaciones al siguiente nivel?
             </motion.p>
 
             <motion.div

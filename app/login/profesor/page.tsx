@@ -1,6 +1,5 @@
-"use client"
-import { LoginForm } from "@/components/login-form"
+import LoginPorPasos from "@/components/login-form";
 
 export default function LoginProfesorPage() {
-    return <LoginForm tipo="profesor" />
+    return <LoginPorPasos tipo="profesor" />
 }

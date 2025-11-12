@@ -14,12 +14,12 @@ export default function LoginSelectorPage() {
             {/* 🔵 Halos dinámicos según tamaño de pantalla */}
             <div className="absolute inset-0 pointer-events-none">
                 {/* Desktop: halos laterales */}
-                <div className="hidden sm:block absolute left-[-20%] top-0 w-[55%] h-full bg-gradient-to-r from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
-                <div className="hidden sm:block absolute right-[-20%] top-0 w-[55%] h-full bg-gradient-to-l from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+                <div className="hidden sm:block absolute left-[-20%] top-0 w-[55%] h-full bg-linear-to-r from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+                <div className="hidden sm:block absolute right-[-20%] top-0 w-[55%] h-full bg-linear-to-l from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
 
                 {/* Mobile: halos arriba y abajo */}
-                <div className="block sm:hidden absolute top-[-20%] left-0 w-full h-[50%] bg-gradient-to-b from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
-                <div className="block sm:hidden absolute bottom-[-20%] left-0 w-full h-[50%] bg-gradient-to-t from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+                <div className="block sm:hidden absolute top-[-20%] left-0 w-full h-[50%] bg-linear-to-b from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+                <div className="block sm:hidden absolute bottom-[-20%] left-0 w-full h-[50%] bg-linear-to-t from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
             </div>
 
             {/* 🌟 Contenedor general (imagen + contenido centrado) */}
@@ -29,14 +29,14 @@ export default function LoginSelectorPage() {
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8 }}
-                    className="hidden sm:block flex-shrink-0"
+                    className="hidden sm:block shrink-0"
                 >
                     <Image
                         src="/Acopladosazul.png"
                         alt="Acoplados"
-                        width={275}
-                        height={275}
-                        className="object-contain opacity-90 mix-blend-multiply"
+                        width={280}
+                        height={280}
+                        className="object-contain opacity-90 mix-blend-multiply mt-2"
                         priority
                     />
                 </motion.div>
@@ -64,7 +64,7 @@ export default function LoginSelectorPage() {
                                 className="object-contain mb-2"
                                 priority
                             />
-                            <div className="absolute bottom-[-2px] w-[95%] mr-1 h-[3px] bg-black shadow-[0_5px_8px_rgba(30,58,95,0.9)] rounded"></div>
+                            <div className="absolute -bottom-0.5 w-[95%] mr-1 h-[3px] bg-black shadow-[0_5px_8px_rgba(30,58,95,0.9)] rounded"></div>
                         </div>
 
                     </motion.div>

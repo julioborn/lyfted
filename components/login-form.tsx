@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import Swal from "sweetalert2"
@@ -8,124 +9,65 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Image from "next/image"
+import { ChevronLeft } from "lucide-react"
 import RegistroPorPasos from "./RegistroPorPasos"
-import RegistroProfesorPorPasos from "./profesor/RegistroProfesorPorPasos"
+import RegistroProfesorPorPasos from "./RegistroProfesorPorPasos"
 
-export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
+export default function LoginPorPasos({ tipo }: { tipo: "alumno" | "profesor" }) {
   const router = useRouter()
-  const [identificador, setIdentificador] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [email, setEmail] = useState("")
-  const [telefono, setTelefono] = useState("")
-  const [fechaNacimiento, setFechaNacimiento] = useState("")
-  const [genero, setGenero] = useState("")
-  const [objetivoPrincipal, setObjetivoPrincipal] = useState("")
-  const [lesiones, setLesiones] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [alumnoEncontrado, setAlumnoEncontrado] = useState<any>(null)
-  const [fase, setFase] = useState<"inicio" | "login" | "buscar" | "registro">("inicio")
+  const [paso, setPaso] = useState(1)
+  const [modo, setModo] = useState<"login" | "registro" | null>(null)
   const [dni, setDni] = useState("")
-  const [nombreGimnasio, setNombreGimnasio] = useState("")
-  const [ciudad, setCiudad] = useState("")
-  const [provincia, setProvincia] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [alumnoEncontrado, setAlumnoEncontrado] = useState<any>(null)
 
-  // --- BUSCAR ALUMNO ---
+  const siguiente = () => setPaso((p) => Math.min(p + 1, 3))
+  const anterior = () => setPaso((p) => Math.max(p - 1, 1))
+
+  // 🔍 Buscar alumno por DNI
   const handleBuscarAlumno = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!identificador) {
+    if (!dni) {
       setError("Por favor ingresá tu DNI.")
       return
     }
 
     setLoading(true)
     try {
-      const res = await fetch(`/api/alumnos/by-dni?dni=${identificador}`)
+      const res = await fetch(`/api/alumnos/by-dni?dni=${dni}`)
       const data = await res.json()
-
       if (!res.ok) {
         Swal.fire("❌", data.error || "Alumno no encontrado", "error")
-        setLoading(false)
         return
       }
 
-      // Si el alumno ya completó su registro → login normal
       if (data.alumno.registroCompleto) {
-        Swal.fire("ℹ️", "Tu registro ya está completo. Iniciá sesión.", "info")
-        setFase("inicio")
-        setLoading(false)
-        return
+        Swal.fire("ℹ️", "Este DNI ya está registrado. Usá tu contraseña para iniciar sesión.", "info")
+        setModo("login")
+        setPaso(2)
+      } else {
+        setAlumnoEncontrado(data.alumno)
+        setModo("registro")
+        setPaso(3)
       }
-
-      // Si aún no completó → mostrar formulario de registro
-      setAlumnoEncontrado(data.alumno)
-      setFase("registro")
-      // Swal.fire("✅", "Alumno encontrado. Completá tus datos.", "success")
-    } catch (err) {
+    } catch {
       Swal.fire("❌", "Error al buscar alumno", "error")
     } finally {
       setLoading(false)
     }
   }
 
-  // --- FINALIZAR REGISTRO ---
-  const handleRegistro = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!alumnoEncontrado) return
-    if (password !== confirmPassword) {
-      Swal.fire("⚠️", "Las contraseñas no coinciden", "warning")
-      return
-    }
-
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/alumnos/${alumnoEncontrado._id}/completar-registro`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          password,
-          email,
-          telefono,
-          fechaNacimiento,
-          genero,
-          objetivoPrincipal,
-          lesiones,
-        }),
-      })
-
-      if (!res.ok) {
-        Swal.fire("❌", "Error al completar el registro", "error")
-        return
-      }
-
-      // ✅ Inicia sesión automáticamente después de registrarse
-      await signIn("credentials", {
-        redirect: false,
-        identificador,
-        password,
-        tipo: "alumno",
-      })
-
-      Swal.fire("✅", "Registro completado correctamente", "success").then(() =>
-        router.replace("/alumno/bienvenida")
-      )
-    } catch (err) {
-      Swal.fire("❌", "Error interno del servidor", "error")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // --- LOGIN DIRECTO (si ya tiene registro completo) ---
+  // 🔐 Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError("")
     setLoading(true)
+    setError("")
 
     const result = await signIn("credentials", {
       redirect: false,
-      identificador,
+      identificador: dni,
       password,
       tipo,
     })
@@ -139,341 +81,176 @@ export function LoginForm({ tipo }: { tipo: "alumno" | "profesor" }) {
     router.push(tipo === "profesor" ? "/profesor/dashboard" : "/alumno/dashboard")
   }
 
+  const variants = {
+    enter: { opacity: 0, x: 40 },
+    center: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -40 },
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 p-6">
-      <div className="w-full max-w-md bg-transparent p-0 shadow-none">
-        <div className="flex justify-center mb-4">
-          <Image src="/logo-lyfted.png" alt="Lyfted Logo" width={100} height={100} priority />
-        </div>
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-white text-[#1E3A5F]">
+      {/* 🔵 Halos azules de fondo */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="hidden sm:block absolute left-[-20%] top-0 w-[55%] h-full bg-linear-to-r from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+        <div className="hidden sm:block absolute right-[-20%] top-0 w-[55%] h-full bg-linear-to-l from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+        <div className="block sm:hidden absolute top-[-20%] left-0 w-full h-[50%] bg-linear-to-b from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+        <div className="block sm:hidden absolute bottom-[-20%] left-0 w-full h-[50%] bg-linear-to-t from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+      </div>
 
-        <h1 className="text-center text-3xl font-semibold text-[#1E3A5F] mb-6">
-          {tipo === "profesor" ? "Acceso Entrenador" : "Acceso Alumno"}
-        </h1>
+      <div className="relative mt-10 z-10 bg-white/80 backdrop-blur-lg shadow-xl rounded-3xl p-8 sm:p-10 w-full max-w-md sm:max-w-2xl lg:max-w-2xl mx-4 border border-slate-100 text-center">
+        {/* Logo superior */}
+        <Image
+          src="/logosinfondoazul.png"
+          alt="Lyfted Logo"
+          width={200}
+          height={200}
+          className="mx-auto" // 👈 margen mínimo o podés quitarlo directamente
+          priority
+        />
 
-        {/* --- FASE INICIAL: ELEGIR LOGIN O REGISTRO --- */}
-        {fase === "inicio" && tipo === "alumno" && !alumnoEncontrado && (
-          <div className="flex flex-col gap-4">
-            <Button
-              onClick={() => setFase("login")}
-              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
-            >
-              Iniciar sesión
-            </Button>
-            <Button
-              onClick={() => setFase("buscar")}
-              className="w-full bg-white border text-[#1E3A5F] hover:bg-slate-100"
-            >
-              Registrarme
-            </Button>
-          </div>
-        )}
-
-        {/* --- LOGIN DIRECTO --- */}
-        {fase === "login" && tipo === "alumno" && (
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <Label>DNI</Label>
-              <Input
-                type="text"
-                value={identificador}
-                onChange={(e) => setIdentificador(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label>Contraseña</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {error && <p className="text-sm text-red-500">{error}</p>}
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
-            >
-              {loading ? "Ingresando..." : "Iniciar sesión"}
-            </Button>
-
-            <p
-              className="text-center text-sm text-[#1E3A5F] mt-2 cursor-pointer hover:underline"
-              onClick={() => setFase("inicio")}
-            >
-              ← Volver
-            </p>
-          </form>
-        )}
-
-        {/* --- FASE BUSCAR ALUMNO PARA REGISTRO --- */}
-        {fase === "buscar" && tipo === "alumno" && (
-          <form onSubmit={handleBuscarAlumno} className="space-y-4">
-            <div>
-              <Label>DNI</Label>
-              <Input
-                type="text"
-                value={identificador}
-                onChange={(e) => setIdentificador(e.target.value)}
-                required
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
-            >
-              {loading ? "Buscando..." : "Continuar"}
-            </Button>
-
-            {error && <p className="text-sm text-red-500">{error}</p>}
-
-            <p
-              className="text-center text-sm text-[#1E3A5F] mt-2 cursor-pointer hover:underline"
-              onClick={() => setFase("inicio")}
-            >
-              ← Volver
-            </p>
-          </form>
-        )}
-
-        {/* --- FASE DE REGISTRO COMPLETO --- */}
-        {fase === "registro" && tipo === "alumno" && (
-          <div className="w-full">
-            <RegistroPorPasos
-              alumnoEncontrado={alumnoEncontrado}
-              identificador={identificador}
-              router={router}
-            />
-          </div>
-        )}
-
-        {fase === "registro" && tipo === "profesor" && (
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault()
-              setError("")
-              setLoading(true)
-
-              try {
-                const res = await fetch("/api/profesores/registro", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    nombre: identificador,
-                    dni,
-                    telefono,
-                    password,
-                    email,
-                    nombreGimnasio,
-                    ciudad,
-                    provincia,
-                  }),
-                })
-
-                const data = await res.json()
-
-                if (!res.ok) {
-                  Swal.fire("❌", data.error || "Error al crear el entrenador", "error")
-                  setLoading(false)
-                  return
-                }
-
-                // ✅ Inicia sesión automáticamente después del registro
-                await signIn("credentials", {
-                  redirect: false,
-                  identificador: dni,
-                  password,
-                  tipo: "profesor",
-                })
-
-                Swal.fire("✅", "Entrenador registrado correctamente", "success").then(() => {
-                  router.replace("/profesor/bienvenida")
-                })
-
-                router.push("/profesor/dashboard")
-              } catch (err) {
-                console.error(err)
-                Swal.fire("❌", "Error interno del servidor", "error")
-              } finally {
-                setLoading(false)
-              }
-            }}
-            className="space-y-4"
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${paso}-${modo}`}
+            variants={variants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.4 }}
           >
-            <div>
-              <Label>Nombre y Apellido</Label>
-              <Input
-                type="text"
-                value={identificador}
-                onChange={(e) => setIdentificador(e.target.value)}
-                required
+            {/* 🔹 Paso 1 - Elegir acción */}
+            {paso === 1 && (
+              <>
+                <h2 className="text-2xl font-semibold mb-2 mt-2">
+                  {tipo === "profesor" ? "Bienvenido entrenador" : "Bienvenido alumno"}
+                </h2>
+                <p className="text-gray-600 text-sm mb-8">
+                  Elegí una opción para continuar
+                </p>
+
+                <div className="flex flex-col gap-4">
+                  <Button
+                    onClick={() => {
+                      setModo("login")
+                      setPaso(2)
+                    }}
+                    className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90 py-2 rounded-xl shadow-md transition-all"
+                  >
+                    Iniciar sesión
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      setModo("registro")
+                      setPaso(2)
+                    }}
+                    variant="outline"
+                    className="w-full border-[#1E3A5F] text-[#1E3A5F] hover:bg-[#1E3A5F]/10 py-2 rounded-xl shadow-md transition-all"
+                  >
+                    Registrarme
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* 🔹 Paso 2 - Iniciar sesión o buscar para registro */}
+            {paso === 2 && modo === "login" && (
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  {/* <Button variant="ghost" onClick={anterior}>
+                    <ChevronLeft className="w-5 h-5 text-[#1E3A5F]" />
+                  </Button> */}
+                  <h2 className="text-2xl font-semibold flex-1">
+                    Iniciar sesión
+                  </h2>
+                </div>
+
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <Label>DNI</Label>
+                    <Input
+                      type="text"
+                      value={dni}
+                      onChange={(e) => setDni(e.target.value)}
+                      required
+                      className="text-center text-lg"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Contraseña</Label>
+                    <Input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="text-center text-lg"
+                    />
+                  </div>
+
+                  {error && <p className="text-sm text-red-500">{error}</p>}
+
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90 py-2 rounded-xl shadow-md transition-all"
+                  >
+                    {loading ? "Ingresando..." : "Entrar"}
+                  </Button>
+                </form>
+              </>
+            )}
+
+            {paso === 2 && modo === "registro" && (
+              <>
+                {tipo === "profesor" ? (
+                  // 🔹 Registro completo del profesor (sin búsqueda previa)
+                  <RegistroProfesorPorPasos router={router} />
+                ) : (
+                  // 🔹 Registro de alumno (con búsqueda por DNI)
+                  <>
+                    <div className="flex items-center gap-2 mb-4">
+                      <h2 className="text-2xl font-semibold flex-1">
+                        Registrate con tu DNI
+                      </h2>
+                    </div>
+
+                    <form onSubmit={handleBuscarAlumno} className="space-y-4">
+                      <div>
+                        <Label>DNI</Label>
+                        <Input
+                          type="text"
+                          value={dni}
+                          onChange={(e) => setDni(e.target.value)}
+                          required
+                          className="text-center text-lg"
+                        />
+                      </div>
+
+                      <Button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90 py-2 rounded-xl shadow-md transition-all"
+                      >
+                        {loading ? "Buscando..." : "Continuar"}
+                      </Button>
+                    </form>
+                  </>
+                )}
+              </>
+            )}
+
+            {/* 🔹 Paso 3 - Registro por pasos */}
+            {paso === 3 && modo === "registro" && alumnoEncontrado && (
+              <RegistroPorPasos
+                alumnoEncontrado={alumnoEncontrado}
+                identificador={dni}
+                router={router}
+                tipo={tipo} // 👈 agregado aquí
               />
-            </div>
-
-            <div>
-              <Label>DNI</Label>
-              <Input
-                type="text"
-                value={dni}
-                onChange={(e) => setDni(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label>Teléfono</Label>
-              <Input
-                type="text"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label>Correo electrónico</Label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label>Nombre del gimnasio o marca personal</Label>
-              <Input
-                type="text"
-                value={nombreGimnasio}
-                onChange={(e) => setNombreGimnasio(e.target.value)}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <Label>Ciudad</Label>
-                <Input
-                  type="text"
-                  value={ciudad}
-                  onChange={(e) => setCiudad(e.target.value)}
-                />
-              </div>
-              <div className="flex-1">
-                <Label>Provincia</Label>
-                <Input
-                  type="text"
-                  value={provincia}
-                  onChange={(e) => setProvincia(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label>Contraseña</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label>Confirmar contraseña</Label>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {error && <p className="text-sm text-red-500">{error}</p>}
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
-            >
-              {loading ? "Registrando..." : "Registrarme como entrenador"}
-            </Button>
-
-            <p
-              className="text-center text-sm text-[#1E3A5F] mt-2 cursor-pointer hover:underline"
-              onClick={() => setFase("inicio")}
-            >
-              ← Volver
-            </p>
-          </form>
-        )}
-
-        {/* --- FASE INICIAL: ELEGIR LOGIN O REGISTRO (PROFESOR) --- */}
-        {fase === "inicio" && tipo === "profesor" && (
-          <div className="flex flex-col gap-4">
-            <Button
-              onClick={() => setFase("login")}
-              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
-            >
-              Iniciar sesión
-            </Button>
-            <Button
-              onClick={() => setFase("registro")}
-              className="w-full bg-white border text-[#1E3A5F] hover:bg-slate-100"
-            >
-              Registrarme
-            </Button>
-          </div>
-        )}
-
-        {/* --- LOGIN DIRECTO PROFESOR --- */}
-        {fase === "login" && tipo === "profesor" && (
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <Label>DNI</Label>
-              <Input
-                type="text"
-                value={identificador}
-                onChange={(e) => setIdentificador(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <Label>Contraseña</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {error && <p className="text-sm text-red-500">{error}</p>}
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
-            >
-              {loading ? "Ingresando..." : "Iniciar sesión"}
-            </Button>
-
-            <p
-              className="text-center text-sm text-[#1E3A5F] mt-2 cursor-pointer hover:underline"
-              onClick={() => setFase("inicio")}
-            >
-              ← Volver
-            </p>
-          </form>
-        )}
-
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )
-
 }

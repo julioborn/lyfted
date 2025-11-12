@@ -22,10 +22,13 @@ const handler = NextAuth({
                     password: string
                     tipo: "alumno" | "profesor"
                 }
+
                 if (!identificador || !password || !tipo) return null
 
+                /* ------------------------------------------------------
+                 🔹 PROFESOR: login por DNI
+                ------------------------------------------------------ */
                 if (tipo === "profesor") {
-                    // 🔍 Buscar profesor por DNI (no por email)
                     const profesor = await Profesor.findOne({ dni: identificador })
                     if (!profesor) return null
 
@@ -35,26 +38,31 @@ const handler = NextAuth({
                     return {
                         id: profesor._id.toString(),
                         nombre: profesor.nombre,
+                        apellido: profesor.apellido ?? "",
                         tipo: "profesor",
                         dni: profesor.dni,
-                        registroCompleto: true,
                         email: profesor.email ?? null,
+                        registroCompleto: true,
                         image: profesor.avatar ?? null,
                     }
                 }
 
-                // alumno
+                /* ------------------------------------------------------
+                 🔹 ALUMNO: login por DNI
+                ------------------------------------------------------ */
                 const alumno = await Alumno.findOne({ dni: identificador })
                 if (!alumno) return null
                 if (!alumno.password) return null // aún no creó contraseña
+
                 const ok = await bcrypt.compare(password, alumno.password)
                 if (!ok) return null
 
                 return {
                     id: alumno._id.toString(),
                     nombre: alumno.nombre,
+                    apellido: alumno.apellido ?? "",
                     tipo: "alumno",
-                    dni: alumno.dni, // 👈 agregado
+                    dni: alumno.dni,
                     registroCompleto: Boolean(alumno.registroCompleto),
                     email: alumno.email ?? null,
                     image: alumno.image ?? null,
@@ -75,7 +83,7 @@ const handler = NextAuth({
                 token.id = user.id
                 token.tipo = user.tipo
                 token.nombre = user.nombre
-                token.dni = user.dni ?? null         // 👈 asegurate de tener esta línea
+                token.dni = user.dni ?? null
                 token.registroCompleto = user.registroCompleto
             }
             return token
@@ -87,7 +95,7 @@ const handler = NextAuth({
                     id: token.id,
                     tipo: token.tipo,
                     nombre: token.nombre,
-                    dni: token.dni ?? null,            // 👈 y esta línea también
+                    dni: token.dni ?? null,
                     registroCompleto: token.registroCompleto,
                     email: session.user?.email || null,
                     image: session.user?.image || null,
