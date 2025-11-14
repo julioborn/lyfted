@@ -56,7 +56,7 @@ export default function AlumnoLayout({
     <div className="min-h-screen bg-background">
       {/* Navbar del alumno */}
       <NavbarAlumno />
-      <main className="container mx-auto p-4 md:p-6">{children}</main>
+      <main className="min-h-screen w-full p-0 m-0">{children}</main>
     </div>
   )
 }
