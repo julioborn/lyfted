@@ -47,35 +47,39 @@ export function NavbarProfesor() {
   const pathname = usePathname()
 
   return (
-    <nav className="border-b bg-card sticky top-0 z-50">
+    <nav className="bg-[#1E3A5F] text-white sticky top-0 z-50 shadow-md">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+
         {/* Menú lateral */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/10">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
+
           <SheetContent side="left" className="w-[280px]">
             <SheetHeader>
               <SheetTitle>Navegación</SheetTitle>
             </SheetHeader>
+
             <div className="mt-6 flex flex-col gap-2">
               {rutasProfesor.map((item) => {
                 const Icono = item.icono
                 const esActiva = pathname.startsWith(item.ruta)
-
                 return (
                   <Link key={item.ruta} href={item.ruta}>
                     <Button
                       variant={esActiva ? "default" : "ghost"}
                       className={cn(
                         "w-full justify-start gap-3",
-                        esActiva && "bg-primary text-primary-foreground"
+                        esActiva
+                          ? "bg-[#1E3A5F] text-white"
+                          : "hover:bg-[#1E3A5F]/10 hover:text-[#1E3A5F]"
                       )}
                     >
                       <Icono className="h-5 w-5" />
-                      <span>{item.nombre}</span>
+                      {item.nombre}
                     </Button>
                   </Link>
                 )
@@ -87,37 +91,46 @@ export function NavbarProfesor() {
         {/* Logo central */}
         <Link
           href="/profesor/dashboard"
-          className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2"
+          className="absolute left-1/2 transform -translate-x-1/2 flex items-center"
         >
-          <span className="font-bold text-lg hidden sm:inline">Lyfted</span>
+          {/* MOBILE */}
+          <img
+            src="/lblanca.png"
+            alt="Logo Lyfted"
+            className="h-10 w-auto object-contain sm:hidden"
+          />
+          {/* DESKTOP */}
+          <img
+            src="/lyftedblanco.png"
+            alt="Logo Lyfted"
+            className="h-10 w-auto object-contain hidden sm:block"
+          />
         </Link>
 
-        {/* Avatar / menú usuario */}
+        {/* Avatar */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Button variant="ghost" className="relative h-10 w-10 rounded-full text-white">
               <Avatar>
-                <AvatarImage
-                  src={usuario?.image || "/placeholder.svg"}
-                  alt={usuario?.nombre || "Usuario"}
-                />
+                <AvatarImage src={usuario?.image || "/placeholder.svg"} />
                 <AvatarFallback>
                   {usuario?.nombre?.charAt(0).toUpperCase() || "?"}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{usuario?.nombre}</p>
-                <p className="text-xs text-muted-foreground">{usuario?.email}</p>
-              </div>
+              <p className="text-sm font-medium">{usuario?.nombre}</p>
+              <p className="text-xs text-muted-foreground">{usuario?.email}</p>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
+
             <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Cerrar Sesión</span>
+              Cerrar Sesión
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

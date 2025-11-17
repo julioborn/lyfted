@@ -13,12 +13,12 @@ export default function BienvenidaProfesor() {
             {/* 🔵 Halos laterales (degradé azul como las otras páginas) */}
             <div className="absolute inset-0 pointer-events-none">
                 {/* Desktop halos */}
-                <div className="hidden sm:block absolute left-[-20%] top-0 w-[55%] h-full bg-gradient-to-r from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
-                <div className="hidden sm:block absolute right-[-20%] top-0 w-[55%] h-full bg-gradient-to-l from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+                <div className="hidden sm:block absolute left-[-20%] top-0 w-[55%] h-full bg-linear-to-r from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+                <div className="hidden sm:block absolute right-[-20%] top-0 w-[55%] h-full bg-linear-to-l from-blue-300 via-blue-100 to-transparent blur-2xl opacity-90"></div>
 
                 {/* Mobile halos */}
-                <div className="block sm:hidden absolute top-[-20%] left-0 w-full h-[50%] bg-gradient-to-b from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
-                <div className="block sm:hidden absolute bottom-[-20%] left-0 w-full h-[50%] bg-gradient-to-t from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+                <div className="block sm:hidden absolute top-[-20%] left-0 w-full h-[50%] bg-linear-to-b from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
+                <div className="block sm:hidden absolute bottom-[-20%] left-0 w-full h-[50%] bg-linear-to-t from-blue-200 via-blue-100 to-transparent blur-2xl opacity-90"></div>
             </div>
 
             {/* 💨 Efecto de polvo */}
@@ -78,7 +78,7 @@ export default function BienvenidaProfesor() {
             >
                 <p
                     className="font-bold leading-tight 
-                               text-[30px] mb-[2px]   // mobile
+                               text-[30px] mb-0.5   // mobile
                                sm:text-4xl sm:mb-0"  // desktop igual
                 >
                     Bienvenido a
@@ -104,7 +104,7 @@ export default function BienvenidaProfesor() {
         absolute left-1/2 -translate-x-1/2 text-gray-700 text-center font-medium leading-tight whitespace-normal
 
         /* 📱 Mobile */
-        top-[36%] text-[14px] max-w-[210px] leading-snug
+        top-[36%] text-[14px] max-w-[210px]
 
         /* 💻 Desktop */
         sm:top-[34%] sm:text-lg sm:max-w-[320px]
