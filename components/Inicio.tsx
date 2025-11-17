@@ -10,7 +10,7 @@ export function Inicio() {
     const router = useRouter()
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 text-center p-6">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-b from-slate-50 to-slate-100 dark:from-gray-900 dark:to-gray-800 text-center p-6">
 
             {/* Logo y título */}
             <motion.div
