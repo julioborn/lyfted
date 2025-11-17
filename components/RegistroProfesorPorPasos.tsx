@@ -39,22 +39,19 @@ export default function RegistroProfesorPorPasos({ router }: { router: any }) {
 
         setLoading(true)
         try {
-            const formData = new FormData()
-            formData.append("nombre", nombre)
-            formData.append("apellido", apellido)
-            formData.append("dni", dni)
-            formData.append("ciudad", ciudad)
-            formData.append("provincia", provincia)
-            formData.append("telefono", telefono)
-            formData.append("email", email)
-            formData.append("nombreGimnasio", nombreGimnasio)
-            formData.append("password", password)
-            formData.append("metodoPago", metodoPago)
-            if (avatar) formData.append("avatar", avatar)
-
             const res = await fetch("/api/profesores", {
                 method: "POST",
-                body: formData,
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    dni,
+                    nombre,
+                    apellido,
+                    email,
+                    telefono,
+                    password
+                })
             })
 
             if (!res.ok) {
@@ -77,7 +74,7 @@ export default function RegistroProfesorPorPasos({ router }: { router: any }) {
             }
 
             Swal.fire("✅", "Registro completado correctamente", "success").then(() =>
-                router.replace("/profesor/dashboard")
+                router.replace("/profesor/bienvenida")
             )
         } catch (err) {
             Swal.fire("❌", "Error interno del servidor", "error")

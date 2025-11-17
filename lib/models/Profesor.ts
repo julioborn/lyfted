@@ -41,4 +41,4 @@ const ProfesorSchema = new Schema(
   { timestamps: true }
 )
 
-export default model("Profesor", ProfesorSchema)
+export default models.Profesor || model("Profesor", ProfesorSchema)
