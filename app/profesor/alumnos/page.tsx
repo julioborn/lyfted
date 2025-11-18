@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Search, Mail, Calendar, Phone, UserCircle, Activity, Target } from "lucide-react"
+import { Search, Mail, Calendar, Phone, UserCircle, Activity, Target, Dumbbell, TriangleAlert, BriefcaseMedical, TrendingUp, Goal } from "lucide-react"
 import { DialogNuevoAlumno } from "@/components/profesor/dialog-nuevo-alumno"
 import { DialogDetalleAlumno } from "@/components/profesor/dialog-detalle-alumno"
 import type { Alumno, PlanEntrenamiento, Pago } from "@/types"
@@ -73,6 +73,26 @@ export default function AlumnosPage() {
       alumno.dni?.includes(busqueda)
   )
 
+  const estadoPlanEstilos = {
+    activo: "bg-green-500/20 text-green-700 border border-green-500/30",
+    por_vencer: "bg-orange-500/20 text-orange-700 border border-orange-500/30",
+    vencido: "bg-red-500/20 text-red-700 border border-red-500/30",
+    sin_plan: "bg-gray-400/20 text-gray-600 border border-gray-400/30",
+  }
+
+  function getEstadoPlanStyle(estado: string | undefined) {
+    switch (estado) {
+      case "activo":
+        return { bg: "bg-green-100", text: "text-green-700", label: "Activo" }
+      case "por_vencer":
+        return { bg: "bg-orange-100", text: "text-orange-700", label: "Por vencer" }
+      case "vencido":
+        return { bg: "bg-red-100", text: "text-red-700", label: "Vencido" }
+      default:
+        return { bg: "bg-gray-200", text: "text-gray-600", label: "Sin asignar" }
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -103,61 +123,63 @@ export default function AlumnosPage() {
             return (
               <Card
                 key={alumnoId}
-                className="hover:shadow-lg transition-shadow cursor-pointer"
+                className="relative hover:shadow-lg transition-shadow cursor-pointer w-[90%] mx-auto"
                 onClick={() => setAlumnoSeleccionado(alumno)}
               >
-                <CardContent className="p-6 flex flex-col gap-3">
+
+                {/* ESTADO DEL PLAN */}
+                {(() => {
+                  const e = getEstadoPlanStyle(alumno.estadoPlan)
+                  return (
+                    <span
+                      className={`
+          absolute top-2 right-2 px-2 py-1 rounded-md text-xs font-medium
+          ${e.bg} ${e.text}
+        `}
+                    >
+                      {e.label}
+                    </span>
+                  )
+                })()}
+
+                <CardContent className="flex flex-col">
                   <div className="flex items-center gap-4">
+
                     <Avatar className="h-14 w-14">
                       <AvatarImage src={alumno.avatar || "/placeholder.svg"} alt={alumno.nombre} />
                       <AvatarFallback>{alumno.nombre?.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
+
                     <div>
                       <h3 className="font-semibold text-base">{alumno.nombre}</h3>
+
+                      {/* OBJETIVO */}
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Mail className="h-4 w-4" /> {alumno.email}
+                        <Goal className="h-4 w-4" />
+                        {alumno.objetivoPrincipal
+                          ? alumno.objetivoPrincipal.charAt(0).toUpperCase() + alumno.objetivoPrincipal.slice(1)
+                          : ""}
                       </p>
+
+                      {/* NIVEL */}
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Phone className="h-4 w-4" /> {alumno.telefono}
+                        <TrendingUp className="h-4 w-4" />
+                        {alumno.nivel
+                          ? alumno.nivel.charAt(0).toUpperCase() + alumno.nivel.slice(1)
+                          : "Principiante"}
                       </p>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <UserCircle className="h-4 w-4" /> DNI: {alumno.dni}
-                      </p>
+
+                      {/* LESIONES */}
+                      {alumno.lesiones && (
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <BriefcaseMedical className="h-4 w-4" /> {alumno.lesiones}
+                        </p>
+                      )}
+
                     </div>
                   </div>
 
-                  {alumno.genero && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <UserCircle className="h-4 w-4" /> Género: {alumno.genero}
-                    </p>
-                  )}
-
-                  {alumno.fechaNacimiento && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Nacimiento:{" "}
-                      {new Date(alumno.fechaNacimiento).toLocaleDateString("es-AR")}
-                    </p>
-                  )}
-
-                  {alumno.lesiones && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Activity className="h-4 w-4" /> Lesiones: {alumno.lesiones}
-                    </p>
-                  )}
-
-                  {alumno.objetivo && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Target className="h-4 w-4" /> Objetivo: {alumno.objetivo}
-                    </p>
-                  )}
-
-                  {alumno.objetivoPrincipal && (
-                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Target className="h-4 w-4" /> Objetivo principal: {alumno.objetivoPrincipal}
-                    </p>
-                  )}
-
+                  {/* BADGES */}
                   <div className="flex flex-wrap gap-2 mt-2">
                     {planActual && (
                       <Badge variant="default" className="text-xs">
@@ -170,6 +192,7 @@ export default function AlumnosPage() {
                       </Badge>
                     )}
                   </div>
+
                 </CardContent>
               </Card>
             )

@@ -62,7 +62,7 @@ const usuario = session?.user
   return (
     <Dialog open={abierto} onOpenChange={setAbierto}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="bg-[#1E3A5F]">
           <UserPlus className="mr-2 h-4 w-4" />
           Nuevo Alumno
         </Button>

@@ -15,6 +15,8 @@ export interface Usuario {
 }
 
 export interface Alumno extends Usuario {
+  nivel: string
+  estadoPlan: string
   tipo: "alumno"
   profesorId: string
   email?: string

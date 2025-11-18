@@ -103,7 +103,7 @@ export function NavbarProfesor() {
           <img
             src="/lyftedblanco.png"
             alt="Logo Lyfted"
-            className="h-10 w-auto object-contain hidden sm:block"
+            className="h-30 w-auto object-contain hidden sm:block"
           />
         </Link>
 
