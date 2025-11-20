@@ -52,7 +52,7 @@ export interface Profesor extends Usuario {
 }
 
 export interface Ejercicio {
-  _id?: string // 👈 agregado
+  _id?: string
   id?: string
   nombre: string
   descripcion: string
@@ -61,7 +61,9 @@ export interface Ejercicio {
   videoUrl?: string
   instrucciones?: string
   profesorId: string
+  origen: "sistema" | "profesor"
 }
+
 
 export interface BloqueEjercicio {
   ejercicioId: string

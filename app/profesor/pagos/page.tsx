@@ -4,154 +4,105 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search } from "lucide-react"
+import { Plus, DollarSign, Clock, CheckCircle } from "lucide-react"
 import { DialogNuevoPago } from "@/components/profesor/dialog-nuevo-pago"
 import type { Pago } from "@/types"
 
 export default function PagosPage() {
-  const { data: session, status } = useSession()
-const usuario = session?.user
-  const [pagos, setPagos] = useState<Pago[]>([])
-  const [busqueda, setBusqueda] = useState("")
-  const [filtroEstado, setFiltroEstado] = useState<"todos" | "pendiente" | "pagado" | "vencido">("todos")
+  const { data: session } = useSession()
+  const usuario = session?.user
 
-  const cargarPagos = () => {
-    const pagosCargados = dataStore.getPagos()
-    setPagos(pagosCargados)
+  const [pagos, setPagos] = useState<Pago[]>([])
+  const [cargando, setCargando] = useState(true)
+
+  const cargarPagos = async () => {
+    try {
+      const pagosBD = await dataStore.getPagos()
+      setPagos(Array.isArray(pagosBD) ? pagosBD : [])
+    } catch (error) {
+      console.error("❌ Error al cargar pagos:", error)
+    } finally {
+      setCargando(false)
+    }
   }
 
   useEffect(() => {
     cargarPagos()
   }, [])
 
-  const pagosFiltrados = pagos.filter((pago) => {
-    const alumno = dataStore.getAlumno(pago.alumnoId)
-    const coincideBusqueda =
-      alumno?.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      pago.concepto.toLowerCase().includes(busqueda.toLowerCase())
-    const coincideEstado = filtroEstado === "todos" || pago.estado === filtroEstado
-    return coincideBusqueda && coincideEstado
+  // ✅ Clasificación lógica
+  const hoy = new Date()
+
+  const pendientes = pagos.filter(p => p.estado === "pendiente")
+
+  const realizados = pagos.filter(p => p.estado === "pagado")
+
+  const porVencer = pagos.filter(p => {
+    if (p.estado !== "pendiente") return false
+    const fecha = new Date(p.fecha)
+    const diff = Math.ceil((fecha.getTime() - hoy.getTime()) / 86400000)
+    return diff <= 5 && diff >= 0
   })
 
-  const cambiarEstadoPago = (pagoId: string, nuevoEstado: "pendiente" | "pagado" | "vencido") => {
-    const pago = pagos.find((p) => p.id === pagoId)
-    if (pago) {
-      pago.estado = nuevoEstado
-      cargarPagos()
-    }
-  }
-
-  const getEstadoBadge = (estado: string) => {
-    switch (estado) {
-      case "pagado":
-        return (
-          <Badge variant="default" className="text-xs">
-            Pagado
-          </Badge>
-        )
-      case "pendiente":
-        return (
-          <Badge variant="secondary" className="text-xs">
-            Pendiente
-          </Badge>
-        )
-      case "vencido":
-        return (
-          <Badge variant="destructive" className="text-xs">
-            Vencido
-          </Badge>
-        )
-      default:
-        return null
-    }
-  }
+  if (cargando)
+    return <p className="text-center text-muted-foreground p-6">Cargando...</p>
 
   return (
-    <div className="space-y-4 md:space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <h1 className="text-xl md:text-2xl font-bold">Pagos</h1>
-        <DialogNuevoPago onPagoCreado={cargarPagos} />
+    <div
+      className="
+        space-y-6
+        p-6
+        w-full
+        sm:w-[95%]
+        lg:w-[90%]
+        flex flex-col
+        justify-start
+        mx-auto
+      "
+    >
+      <h1 className="text-3xl font-semibold text-[#1E3A5F] text-center lg:text-left">
+        Pagos
+      </h1>
+
+      {/* 🔹 BOTONES DE ESTADO */}
+      <div className="grid grid-cols-3 gap-4">
+
+        {/* PENDIENTES */}
+        <Card className="bg-[#E8F1FF] border border-[#1E3A5F]/20 shadow-md rounded-xl h-28 flex flex-col items-center justify-center relative hover:scale-[1.02] transition-all cursor-pointer">
+          <span className="text-[#1E3A5F] font-semibold">Pendientes</span>
+          <Badge className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full text-xs px-2 py-1">
+            {pendientes.length}
+          </Badge>
+        </Card>
+
+        {/* POR VENCER */}
+        <Card className="bg-[#E8F1FF] border border-[#1E3A5F]/20 shadow-md rounded-xl h-28 flex flex-col items-center justify-center relative hover:scale-[1.02] transition-all cursor-pointer">
+          <span className="text-[#1E3A5F] font-semibold">Por vencer</span>
+          <Badge className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full text-xs px-2 py-1">
+            {porVencer.length}
+          </Badge>
+        </Card>
+
+        {/* REALIZADOS */}
+        <Card className="bg-[#E8F1FF] border border-[#1E3A5F]/20 shadow-md rounded-xl h-28 flex flex-col items-center justify-center relative hover:scale-[1.02] transition-all cursor-pointer">
+          <span className="text-[#1E3A5F] font-semibold">Realizados</span>
+          <Badge className="absolute -top-2 -right-2 bg-green-600 text-white rounded-full text-xs px-2 py-1">
+            {realizados.length}
+          </Badge>
+        </Card>
+
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar pagos..."
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          className="pl-10"
-        />
-      </div>
+      <DialogNuevoPago onPagoCreado={cargarPagos}>
+        <Card className="bg-[#E8F1FF] border border-[#1E3A5F]/20 shadow-md rounded-2xl h-32 flex items-center justify-center hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer">
+          <div className="flex flex-col items-center text-[#1E3A5F]">
+            <Plus className="h-8 w-8 mb-1" />
+            <span className="font-semibold text-lg">Registrar Pago</span>
+          </div>
+        </Card>
+      </DialogNuevoPago>
 
-      <Tabs value={filtroEstado} onValueChange={(v) => setFiltroEstado(v as typeof filtroEstado)}>
-        <TabsList className="w-full sm:w-auto">
-          <TabsTrigger value="todos" className="text-xs flex-1 sm:flex-none">
-            Todos
-          </TabsTrigger>
-          <TabsTrigger value="pendiente" className="text-xs flex-1 sm:flex-none">
-            Pendientes
-          </TabsTrigger>
-          <TabsTrigger value="pagado" className="text-xs flex-1 sm:flex-none">
-            Pagados
-          </TabsTrigger>
-          <TabsTrigger value="vencido" className="text-xs flex-1 sm:flex-none">
-            Vencidos
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={filtroEstado} className="mt-4">
-          {pagosFiltrados.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 md:py-12 text-center text-muted-foreground">
-                <p className="text-sm md:text-base">No hay pagos</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-2">
-              {pagosFiltrados.map((pago) => {
-                const alumno = dataStore.getAlumno(pago.alumnoId)
-                const fecha = new Date(pago.fecha)
-
-                return (
-                  <Card key={pago.id}>
-                    <CardContent className="pt-3 md:pt-4">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-sm md:text-base truncate">{alumno?.nombre}</h3>
-                            {getEstadoBadge(pago.estado)}
-                          </div>
-                          <p className="text-xs md:text-sm text-muted-foreground truncate">{pago.concepto}</p>
-                          <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs text-muted-foreground mt-1">
-                            <span>{fecha.toLocaleDateString()}</span>
-                            <span>•</span>
-                            <span className="font-semibold text-foreground">${pago.monto.toLocaleString()}</span>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 sm:shrink-0">
-                          {pago.estado !== "pagado" && (
-                            <Button
-                              size="sm"
-                              onClick={() => cambiarEstadoPago(pago.id, "pagado")}
-                              className="text-xs h-8 flex-1 sm:flex-none"
-                            >
-                              Marcar Pagado
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
     </div>
   )
 }
