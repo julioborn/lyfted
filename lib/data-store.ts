@@ -241,7 +241,8 @@ class DataStore {
     try {
       const response = await fetch(`/api/alumnos/${id}`)
       if (response.ok) {
-        return await response.json()
+        const data = await response.json()
+        return data.alumno
       }
       return undefined
     } catch (error) {

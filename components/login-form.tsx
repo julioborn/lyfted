@@ -172,7 +172,7 @@ export default function LoginPorPasos({ tipo }: { tipo: "alumno" | "profesor" })
                       value={dni}
                       onChange={(e) => setDni(e.target.value)}
                       required
-                      className="text-center text-lg"
+                      className="text-lg mt-1"
                     />
                   </div>
 
@@ -183,7 +183,7 @@ export default function LoginPorPasos({ tipo }: { tipo: "alumno" | "profesor" })
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="text-center text-lg"
+                      className="text-lg mt-1"
                     />
                   </div>
 
@@ -222,7 +222,7 @@ export default function LoginPorPasos({ tipo }: { tipo: "alumno" | "profesor" })
                           value={dni}
                           onChange={(e) => setDni(e.target.value)}
                           required
-                          className="text-center text-lg"
+                          className="text-lg mt-1"
                         />
                       </div>
 

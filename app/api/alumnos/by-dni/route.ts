@@ -18,6 +18,7 @@ export async function GET(req: Request) {
             alumno: {
                 _id: alumno._id.toString(),
                 nombre: alumno.nombre,
+                apellido: alumno.apellido,
                 dni: alumno.dni,
                 registroCompleto: alumno.registroCompleto,
             },

@@ -25,9 +25,7 @@ const handler = NextAuth({
 
                 if (!identificador || !password || !tipo) return null
 
-                /* ------------------------------------------------------
-                 🔹 PROFESOR: login por DNI
-                ------------------------------------------------------ */
+                // PROFESOR
                 if (tipo === "profesor") {
                     const profesor = await Profesor.findOne({ dni: identificador })
                     if (!profesor) return null
@@ -47,12 +45,9 @@ const handler = NextAuth({
                     }
                 }
 
-                /* ------------------------------------------------------
-                 🔹 ALUMNO: login por DNI
-                ------------------------------------------------------ */
+                // ALUMNO
                 const alumno = await Alumno.findOne({ dni: identificador })
-                if (!alumno) return null
-                if (!alumno.password) return null // aún no creó contraseña
+                if (!alumno || !alumno.password) return null
 
                 const ok = await bcrypt.compare(password, alumno.password)
                 if (!ok) return null
@@ -75,7 +70,30 @@ const handler = NextAuth({
         signIn: "/login",
     },
 
-    session: { strategy: "jwt" },
+    session: {
+        strategy: "jwt",
+        maxAge: 365 * 24 * 60 * 60, // 1 año
+    },
+
+    jwt: {
+        maxAge: 365 * 24 * 60 * 60,
+    },
+
+    cookies: {
+        sessionToken: {
+            name:
+                process.env.NODE_ENV === "production"
+                    ? "__Secure-next-auth.session-token"
+                    : "next-auth.session-token",
+            options: {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/",
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 365 * 24 * 60 * 60,
+            },
+        },
+    },
 
     callbacks: {
         async jwt({ token, user }) {

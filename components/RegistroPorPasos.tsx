@@ -93,6 +93,8 @@ export default function RegistroPorPasos({
         exit: { opacity: 0, x: -40 },
     }
 
+    console.log("👉 alumnoEncontrado:", alumnoEncontrado)
+
     return (
         <div className="flex justify-center px-4 py-6">
             <div className="relative bg-white w-full max-w-md sm:max-w-3xl lg:max-w-4xl transition-all">
@@ -107,7 +109,7 @@ export default function RegistroPorPasos({
                     >
                         {/* ------------------- PASO 1 ------------------- */}
                         {paso === 1 && (
-                            <div className="space-y-4">
+                            <div className="space-y-2">
                                 <StepTitle
                                     texto="Contanos sobre vos"
                                     descripcion="Queremos conocerte un poco más para planificar tu entrenamiento de manera personalizada y acorde a tus necesidades."
@@ -120,9 +122,15 @@ export default function RegistroPorPasos({
                                     className="bg-gray-100 cursor-not-allowed"
                                 />
 
-                                <Label>Nombre y Apellido</Label>
+                                <Label>Nombre</Label>
                                 <Input
                                     value={`${alumnoEncontrado.nombre}`}
+                                    disabled
+                                    className="bg-gray-100 cursor-not-allowed"
+                                />
+                                <Label>Apellido</Label>
+                                <Input
+                                    value={`${alumnoEncontrado.apellido}`}
                                     disabled
                                     className="bg-gray-100 cursor-not-allowed"
                                 />

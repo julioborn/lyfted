@@ -103,7 +103,7 @@ export default function RegistroProfesorPorPasos({ router }: { router: any }) {
                     >
                         {/* 📋 PANTALLA 1 */}
                         {paso === 1 && (
-                            <div className="space-y-4">
+                            <div className="space-y-2">
                                 <StepTitle
                                     texto="Comencemos con tus datos principales"
                                     descripcion="Estos datos se usarán para crear tu cuenta y garantizar la seguridad de tu acceso."
@@ -166,7 +166,7 @@ export default function RegistroProfesorPorPasos({ router }: { router: any }) {
 
                         {/* 📞 PANTALLA 2 */}
                         {paso === 2 && (
-                            <div className="space-y-4">
+                            <div className="space-y-2">
                                 <StepTitle
                                     texto="Queremos saber cómo contactarte"
                                     descripcion="Estos datos nos ayudan a personalizar tu perfil y que tus alumnos te reconozcan fácilmente."
@@ -206,7 +206,7 @@ export default function RegistroProfesorPorPasos({ router }: { router: any }) {
 
                         {/* 🚀 PANTALLA 3 */}
                         {paso === 3 && (
-                            <div className="space-y-4">
+                            <div className="space-y-2">
                                 <StepTitle
                                     texto="Tu cuenta está casi lista…"
                                     descripcion="Solo falta un último paso para empezar a usar LYFTED. Confirmá tu método de pago y activá tu suscripción para acceder a todas las herramientas de la plataforma."

@@ -61,8 +61,7 @@ export default function DashboardAlumnoPage() {
     "p-4 bg-white rounded-full shadow-sm border border-[#1E3A5F]/10"
 
   return (
-    <div className="space-y-3 p-4">
-
+    <div className="space-y-6 p-6 w-[90%] flex flex-col justify-center mx-auto">
       {/* TÍTULO */}
       <div>
         <h1 className="text-3xl font-semibold text-[#1E3A5F] mb-0 leading-none">
