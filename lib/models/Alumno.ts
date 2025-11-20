@@ -1,18 +1,31 @@
 import { Schema, model, models } from "mongoose"
+import "@/lib/models/Plan"
 
 const AlumnoSchema = new Schema(
   {
-    nombre: { type: String, required: true },
+    nombre: { type: String, required: true },     // nombre de pila
+    apellido: { type: String, required: true },   // nuevo campo
+
     dni: { type: String, required: true, unique: true },
     telefono: { type: String },
+
+    // 📍 NUEVOS CAMPOS
+    ciudad: { type: String },
+    provincia: { type: String },
+    pais: { type: String },
+
     password: { type: String },
     email: { type: String },
     fechaNacimiento: { type: Date },
-    genero: { type: String, enum: ["masculino", "femenino", "otro"] },
-
+    genero: {
+      type: String,
+      enum: ["masculino", "femenino", "otro", null],
+      default: null
+    },
     objetivoPrincipal: {
       type: String,
       enum: ["fuerza", "masa muscular", "rendimiento", "salud"],
+      default: null,
     },
 
     lesiones: { type: String },
@@ -23,19 +36,16 @@ const AlumnoSchema = new Schema(
     altura: { type: Number },
     avatar: { type: String },
 
-    // 🔥 Nivel del alumno
     nivel: {
       type: String,
       enum: ["principiante", "intermedio", "avanzado"],
       default: "principiante",
     },
 
-    // 🔥 Estado del plan del alumno
-    // Sin asignar | Vencido | Por vencer | Activo
     estadoPlan: {
       type: String,
       enum: ["sin_plan", "vencido", "por_vencer", "activo"],
-      default: "sin_plan", // 👉 como pediste
+      default: "sin_plan",
     },
 
     planActualId: { type: Schema.Types.ObjectId, ref: "Plan" },

@@ -6,9 +6,10 @@ declare module "next-auth" {
             id: string
             tipo: "profesor" | "alumno"
             nombre?: string
+            apellido?: string         // 👈 agregado
             email?: string | null
             image?: string | null
-            dni?: string | null         // 👈 agregado
+            dni?: string | null
             registroCompleto: boolean
         }
     }
@@ -17,9 +18,10 @@ declare module "next-auth" {
         id: string
         tipo: "profesor" | "alumno"
         nombre?: string
+        apellido?: string            // 👈 agregado
         email?: string | null
         image?: string | null
-        dni?: string | null           // 👈 agregado
+        dni?: string | null
         registroCompleto: boolean
     }
 }
@@ -29,9 +31,10 @@ declare module "next-auth/jwt" {
         id: string
         tipo: "profesor" | "alumno"
         nombre?: string
+        apellido?: string            // 👈 agregado
         email?: string | null
         image?: string | null
-        dni?: string | null           // 👈 agregado
+        dni?: string | null
         registroCompleto: boolean
     }
 }

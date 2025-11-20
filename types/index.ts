@@ -5,9 +5,10 @@ export type ObjetivoAlumno = "fuerza" | "masa_muscular" | "rendimiento" | "salud
 export type PlanSuscripcion = "unico"
 
 export interface Usuario {
-  _id?: string // 👈 agregado (MongoDB)
-  id?: string  // opcional por compatibilidad
+  _id?: string
+  id?: string
   nombre: string
+  apellido: string        // 👈 nuevo
   dni: string
   telefono: string
   tipo: TipoUsuario
@@ -20,17 +21,19 @@ export interface Alumno extends Usuario {
   tipo: "alumno"
   profesorId: string
   email?: string
-  fechaNacimiento?: string
-  genero?: "masculino" | "femenino" | "otro"
+  fechaNacimiento?: string | null
+  genero?: "masculino" | "femenino" | "otro" | null
   objetivo?: ObjetivoAlumno
-  objetivoPrincipal?: string        // 👈 agregado
-  lesiones?: string                 // 👈 agregado
-  peso?: number
-  altura?: number
-  planActualId?: string
+  objetivoPrincipal?: string | null
+  lesiones?: string
+  peso?: number | null
+  altura?: number | null
+  planActualId?: string | null
   registroCompleto: boolean
-  activo?: boolean                  // 👈 ya que aparece en tu documento
-  fechaCreacion?: string            // opcional si querés mapear createdAt
+  activo?: boolean
+  ciudad?: string
+  provincia?: string
+  pais?: string
 }
 
 export interface Profesor extends Usuario {

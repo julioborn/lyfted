@@ -58,25 +58,25 @@ export default function DashboardProfesorPage() {
   // 🎨 Orden y datos de las cards
   const menuItems = [
     {
-      titulo: "Mis Alumnos",
+      titulo: "Alumnos",
       descripcion: `${alumnos.length} alumnos`,
       icono: Users,
       href: "/profesor/alumnos",
     },
+    // {
+    //   titulo: "Nuevo Alumno",
+    //   descripcion: "Agregar",
+    //   icono: UserPlus,
+    //   href: "/profesor/alumnos",
+    // },
+    // {
+    //   titulo: "Crear Plan",
+    //   descripcion: "Nuevo plan",
+    //   icono: PlusCircle,
+    //   href: "/profesor/planes",
+    // },
     {
-      titulo: "Nuevo Alumno",
-      descripcion: "Agregar",
-      icono: UserPlus,
-      href: "/profesor/alumnos",
-    },
-    {
-      titulo: "Crear Plan",
-      descripcion: "Nuevo plan",
-      icono: PlusCircle,
-      href: "/profesor/planes",
-    },
-    {
-      titulo: "Planes a Renovar",
+      titulo: "Planificaciones",
       descripcion: `${planesARenovar} planes`,
       icono: Clock,
       href: "/profesor/planes",
@@ -96,7 +96,7 @@ export default function DashboardProfesorPage() {
   ]
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 w-[90%] flex flex-col justify-center mx-auto">
       {/* Título */}
       <div>
         <h1 className="text-3xl font-semibold text-[#1E3A5F] mb-0 leading-none">
@@ -112,22 +112,21 @@ export default function DashboardProfesorPage() {
       </div>
 
       {/* Grid de tarjetas */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 md:gap-6">
         {menuItems.map((item) => {
           const Icon = item.icono
           return (
             <Link key={item.titulo} href={item.href} className="h-full">
               <Card
                 className="
-                  h-full
-                  bg-[#E8F1FF]
-                  border border-[#1E3A5F]/15
-                  shadow-md hover:shadow-lg
-                  rounded-2xl
-                  cursor-pointer
-                  transition-all
-                  hover:scale-[1.03]
-                "
+    bg-[#E8F1FF]
+    border border-[#1E3A5F]/15
+    shadow-md hover:shadow-lg
+    rounded-2xl
+    cursor-pointer
+    transition-all
+    hover:scale-[1.03]
+  "
               >
                 <CardContent className="p-4 md:p-6 flex flex-col items-center text-center gap-2 md:gap-3">
                   <div className="p-3 md:p-4 bg-white rounded-full shadow-sm border border-[#1E3A5F]/10">

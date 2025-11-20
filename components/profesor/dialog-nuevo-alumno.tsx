@@ -20,14 +20,17 @@ import { useSession } from "next-auth/react"
 import type { Alumno } from "@/types"
 
 export function DialogNuevoAlumno({ onAlumnoCreado }: { onAlumnoCreado?: () => void }) {
-  const { data: session, status } = useSession()
-const usuario = session?.user
+  const { data: session } = useSession()
+  const usuario = session?.user
+
   const [abierto, setAbierto] = useState(false)
   const [cargando, setCargando] = useState(false)
 
   const [formData, setFormData] = useState({
     nombre: "",
+    apellido: "",
     dni: "",
+    nivel: "principiante", // 👈 valor por defecto
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,26 +40,44 @@ const usuario = session?.user
     const nuevoAlumno: Alumno = {
       id: `alumno${Date.now()}`,
       nombre: formData.nombre,
+      apellido: formData.apellido,
       dni: formData.dni,
       telefono: "",
+      email: "",
+      fechaNacimiento: null,
+      genero: null,
+      ciudad: "",
+      provincia: "",
+      pais: "",
+      objetivoPrincipal: null,
+      lesiones: "",
+      peso: null,
+      altura: null,
+      nivel: formData.nivel,
+      estadoPlan: "sin_plan",
       tipo: "alumno",
       profesorId: usuario?.id || "",
-      registroCompleto: false, // Indica que el alumno aún no completó su registro
+      planActualId: null,
+      registroCompleto: false,
       avatar: "/placeholder.svg?height=100&width=100",
+      activo: true,
     }
 
+    // 🧠 Guardado en tu sistema (local o backend)
     dataStore.agregarAlumno(nuevoAlumno)
 
+    // limpiar formulario
     setFormData({
       nombre: "",
+      apellido: "",
       dni: "",
+      nivel: "principiante",
     })
+
     setCargando(false)
     setAbierto(false)
 
-    if (onAlumnoCreado) {
-      onAlumnoCreado()
-    }
+    if (onAlumnoCreado) onAlumnoCreado()
   }
 
   return (
@@ -67,28 +88,45 @@ const usuario = session?.user
           Nuevo Alumno
         </Button>
       </DialogTrigger>
+
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Dar de Alta Nuevo Alumno</DialogTitle>
           <DialogDescription>
-            Ingresa el nombre completo y DNI del alumno. El alumno podrá registrarse usando su DNI.
+            Completa los datos del alumno. Luego él podrá finalizar su registro.
           </DialogDescription>
         </DialogHeader>
+
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
+
+            {/* Nombre */}
             <div className="space-y-2">
-              <Label htmlFor="nombre">Nombre Completo *</Label>
+              <Label htmlFor="nombre">Nombre</Label>
               <Input
                 id="nombre"
-                placeholder="Juan Pérez"
+                placeholder="Juan"
                 value={formData.nombre}
                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                 required
               />
             </div>
 
+            {/* Apellido */}
             <div className="space-y-2">
-              <Label htmlFor="dni">DNI *</Label>
+              <Label htmlFor="apellido">Apellido</Label>
+              <Input
+                id="apellido"
+                placeholder="Pérez"
+                value={formData.apellido}
+                onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
+                required
+              />
+            </div>
+
+            {/* DNI */}
+            <div className="space-y-2">
+              <Label htmlFor="dni">DNI</Label>
               <Input
                 id="dni"
                 type="text"
@@ -98,12 +136,38 @@ const usuario = session?.user
                 required
               />
             </div>
+
+            {/* Nivel */}
+            <div className="space-y-2">
+              <Label htmlFor="nivel">Nivel</Label>
+              <select
+                id="nivel"
+                className="border rounded-lg p-2 w-full"
+                value={formData.nivel}
+                onChange={(e) => setFormData({ ...formData, nivel: e.target.value })}
+              >
+                <option value="principiante">Principiante</option>
+                <option value="intermedio">Intermedio</option>
+                <option value="avanzado">Avanzado</option>
+              </select>
+            </div>
+
           </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setAbierto(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={cargando || !formData.nombre || !formData.dni}>
+
+            <Button
+              type="submit"
+              disabled={
+                cargando ||
+                !formData.nombre ||
+                !formData.apellido ||
+                !formData.dni
+              }
+            >
               {cargando ? "Guardando..." : "Dar de Alta"}
             </Button>
           </DialogFooter>
