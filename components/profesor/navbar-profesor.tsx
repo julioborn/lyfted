@@ -95,9 +95,9 @@ export function NavbarProfesor() {
         >
           {/* MOBILE */}
           <img
-            src="/lblanca.png"
-            alt="Logo Lyfted"
-            className="h-10 w-auto object-contain sm:hidden"
+            src="/lyftedblanco.png"
+            alt="Lyfted Logo"
+            className="h-30 w-auto object-contain sm:hidden"
           />
           {/* DESKTOP */}
           <img

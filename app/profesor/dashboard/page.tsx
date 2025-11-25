@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
-import { Users, Clock, PlusCircle, DollarSign, UserPlus, Dumbbell } from "lucide-react"
+import { Users, Clock, DollarSign, Dumbbell } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import type { Alumno, PlanEntrenamiento, Pago } from "@/types"
@@ -27,9 +27,10 @@ export default function DashboardProfesorPage() {
           dataStore.getPagos(),
           dataStore.getPlanes(),
         ])
-        setAlumnos(alumnosData)
-        setPagos(pagosData)
-        setPlanes(planesData)
+
+        setAlumnos(Array.isArray(alumnosData) ? alumnosData : [])
+        setPagos(Array.isArray(pagosData) ? pagosData : [])
+        setPlanes(Array.isArray(planesData) ? planesData : [])
       } catch (error) {
         console.error("❌ Error al cargar datos del dashboard:", error)
       } finally {
@@ -44,7 +45,7 @@ export default function DashboardProfesorPage() {
     return <p className="p-6 text-center text-gray-600">Cargando...</p>
   }
 
-  // 🧠 Cálculos
+  // 🔢 Cálculos
   const planesARenovar = planes.filter((plan) => {
     if (!plan?.fechaFin) return false
     const diasRestantes = Math.ceil(
@@ -55,79 +56,86 @@ export default function DashboardProfesorPage() {
 
   const pagosPendientes = pagos.filter((p) => p.estado === "pendiente").length
 
-  // 🎨 Orden y datos de las cards
+  const bubbleBase =
+    "absolute -top-2 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full px-2 py-1 shadow-md sm:hidden"
+
   const menuItems = [
     {
       titulo: "Alumnos",
       descripcion: `${alumnos.length} alumnos`,
       icono: Users,
       href: "/profesor/alumnos",
+      notificacion: alumnos.length,
     },
-    // {
-    //   titulo: "Nuevo Alumno",
-    //   descripcion: "Agregar",
-    //   icono: UserPlus,
-    //   href: "/profesor/alumnos",
-    // },
-    // {
-    //   titulo: "Crear Plan",
-    //   descripcion: "Nuevo plan",
-    //   icono: PlusCircle,
-    //   href: "/profesor/planes",
-    // },
     {
       titulo: "Planificaciones",
       descripcion: `${planesARenovar} planes`,
       icono: Clock,
       href: "/profesor/planes",
+      notificacion: planesARenovar,
     },
     {
       titulo: "Ejercicios",
       descripcion: "Biblioteca",
       icono: Dumbbell,
       href: "/profesor/ejercicios",
+      notificacion: 0,
     },
     {
       titulo: "Pagos",
       descripcion: `${pagosPendientes} pendientes`,
       icono: DollarSign,
       href: "/profesor/pagos",
+      notificacion: pagosPendientes,
     },
   ]
 
   return (
     <div className="space-y-6 p-6 w-[90%] flex flex-col justify-center mx-auto">
-      {/* Título */}
       <div>
-        <h1 className="text-3xl font-semibold text-[#1E3A5F] mb-0 leading-none">
-          Inicio
-        </h1>
-
-        <p className="text-sm text-gray-600 -mt-px leading-none">
-          Bienvenido,{" "}
-          <span className="font-semibold">
-            {usuario?.nombre || "Profesor"}
-          </span>
+        <h1 className="text-3xl font-semibold text-[#1E3A5F]">Inicio</h1>
+        <p className="text-sm text-gray-600">
+          Bienvenido, <span className="font-semibold">{usuario?.nombre || "Profesor"}</span>
         </p>
       </div>
 
-      {/* Grid de tarjetas */}
-      <div className="grid grid-cols-2 md:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 gap-4 md:gap-6">
         {menuItems.map((item) => {
           const Icon = item.icono
+
           return (
             <Link key={item.titulo} href={item.href} className="h-full">
               <Card
                 className="
-    bg-[#E8F1FF]
-    border border-[#1E3A5F]/15
-    shadow-md hover:shadow-lg
-    rounded-2xl
-    cursor-pointer
-    transition-all
-    hover:scale-[1.03]
-  "
+      relative
+      bg-[#E8F1FF]
+      border border-[#1E3A5F]/15
+      shadow-md hover:shadow-lg
+      rounded-2xl
+      cursor-pointer
+      transition-all
+      hover:scale-[1.03]
+    "
               >
+                {/* 🔴 GLOBITO MOBILE */}
+                {item.notificacion > 0 && (
+                  <span className="
+        absolute
+        top-1
+        right-1
+        bg-red-600
+        text-white
+        text-xs
+        font-semibold
+        rounded-full
+        px-2 py-1
+        shadow-md
+        sm:hidden
+      ">
+                    {item.notificacion}
+                  </span>
+                )}
+
                 <CardContent className="p-4 md:p-6 flex flex-col items-center text-center gap-2 md:gap-3">
                   <div className="p-3 md:p-4 bg-white rounded-full shadow-sm border border-[#1E3A5F]/10">
                     <Icon className="h-6 w-6 md:h-7 md:w-7 text-[#1E3A5F]" />
@@ -137,7 +145,7 @@ export default function DashboardProfesorPage() {
                     {item.titulo}
                   </h3>
 
-                  <p className="text-xs md:text-sm text-gray-600">
+                  <p className="hidden sm:block text-xs md:text-sm text-gray-600">
                     {item.descripcion}
                   </p>
                 </CardContent>

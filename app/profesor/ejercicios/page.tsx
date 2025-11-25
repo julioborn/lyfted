@@ -89,12 +89,12 @@ export default function EjerciciosPage() {
 
         {[
           {
-            titulo: "Zona Media",
-            descripcion: "Core, abdomen y estabilidad",
-          },
-          {
             titulo: "Movilidad",
             descripcion: "Flexibilidad y rango articular",
+          },
+          {
+            titulo: "Zona Media",
+            descripcion: "Core, abdomen y estabilidad",
           },
           {
             titulo: "Pliometría",
