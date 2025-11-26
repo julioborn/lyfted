@@ -361,6 +361,16 @@ class DataStore {
       return false
     }
   }
+
+  async getCategoriasEjercicios() {
+    const res = await fetch("/api/categorias-ejercicios", {
+      cache: "no-store"
+    })
+
+    if (!res.ok) throw new Error("Error cargando categorías")
+    return res.json()
+  }
+
 }
 
 export const dataStore = new DataStore()

@@ -11,6 +11,7 @@ import { Search, Mail, Calendar, Phone, UserCircle, Activity, Target, Dumbbell, 
 import { DialogNuevoAlumno } from "@/components/profesor/dialog-nuevo-alumno"
 import { DialogDetalleAlumno } from "@/components/profesor/dialog-detalle-alumno"
 import type { Alumno, PlanEntrenamiento, Pago } from "@/types"
+import LoaderGlobal from "@/components/LoaderGlobal"
 
 export default function AlumnosPage() {
   const { data: session, status } = useSession()
@@ -63,8 +64,9 @@ export default function AlumnosPage() {
     window.location.reload()
   }
 
-  if (cargando)
-    return <p className="text-center text-muted-foreground mt-10">Cargando alumnos...</p>
+  if (status === "loading" || cargando) {
+    return <LoaderGlobal />
+  }
 
   const alumnosFiltrados = alumnos.filter(
     (alumno) =>

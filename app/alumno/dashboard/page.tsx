@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import type { Alumno, PlanEntrenamiento, Pago } from "@/types"
+import LoaderGlobal from "@/components/LoaderGlobal"
 
 export default function DashboardAlumnoPage() {
   const { data: session, status } = useSession()
@@ -50,8 +51,8 @@ export default function DashboardAlumnoPage() {
     cargar()
   }, [usuario, status])
 
-  if (status === "loading" || cargando) {
-    return <p className="p-6 text-center text-gray-600">Cargando...</p>
+  if (cargando) {
+    return <LoaderGlobal />
   }
 
   const cardBase =

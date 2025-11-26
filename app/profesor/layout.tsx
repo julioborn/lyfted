@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { NavbarProfesor } from "@/components/profesor/navbar-profesor"
+import LoaderGlobal from "@/components/LoaderGlobal"
 
 export default function ProfesorLayout({
   children,
@@ -20,20 +21,14 @@ export default function ProfesorLayout({
     else if (usuario.tipo !== "profesor") router.push("/")
   }, [usuario, status, router])
 
+  // ✅ LOADER GLOBAL CON LOGO LATIENDO
   if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Verificando sesión...</p>
-        </div>
-      </div>
-    )
+    return <LoaderGlobal />
   }
-//hola
+
   return (
     <div className="min-h-screen flex flex-col">
-      <NavbarProfesor /> {/* 👈 acá */}
+      <NavbarProfesor />
       <main className="flex-1">{children}</main>
     </div>
   )
