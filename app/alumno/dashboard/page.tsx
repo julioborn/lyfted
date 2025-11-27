@@ -51,10 +51,6 @@ export default function DashboardAlumnoPage() {
     cargar()
   }, [usuario, status])
 
-  if (cargando) {
-    return <LoaderGlobal />
-  }
-
   const cardBase =
     "h-full bg-[#E8F1FF] border border-[#1E3A5F]/15 shadow-md hover:shadow-lg rounded-2xl cursor-pointer transition-all hover:scale-[1.03]"
 

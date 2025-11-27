@@ -50,9 +50,6 @@ export default function PlanificacionesPage() {
   })
   const pendientes = planes.filter(p => new Date(p.fechaInicio) > hoy)
 
-  if (cargando)
-    return <p className="text-center text-muted-foreground p-6">Cargando...</p>
-
   return (
     <div
       className="

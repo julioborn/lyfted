@@ -56,19 +56,6 @@ export function DialogDetalleAlumno({ alumno, abierto, onCerrar }: DialogDetalle
     fetchData()
   }, [abierto, alumno])
 
-  if (cargando) {
-    return (
-      <Dialog open={abierto} onOpenChange={onCerrar}>
-        <DialogContent className="max-w-2xl text-center py-10">
-          <VisuallyHidden>
-            <DialogTitle>Cargando datos del alumno</DialogTitle>
-          </VisuallyHidden>
-          <p className="text-muted-foreground">Cargando datos del alumno...</p>
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
   const pagosPendientes = pagosAlumno.filter((p) => p.estado === "pendiente")
   const pagosPagados = pagosAlumno.filter((p) => p.estado === "pagado")
   const totalPagado = pagosPagados.reduce((sum, p) => sum + p.monto, 0)

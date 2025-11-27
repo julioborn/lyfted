@@ -40,14 +40,6 @@ export default function DetallePlanPage() {
     cargarPlan()
   }, [planId])
 
-  if (cargando) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Cargando plan...</p>
-      </div>
-    )
-  }
-
   if (!plan) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -130,7 +122,7 @@ export default function DetallePlanPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Días de Entrenamiento</CardTitle>
-            <DialogAgregarDia planId={planId} onDiaAgregado={cargarPlan} />
+            {/* <DialogAgregarDia planId={planId} onDiaAgregado={cargarPlan} /> */}
           </div>
         </CardHeader>
 

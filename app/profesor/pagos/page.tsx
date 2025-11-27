@@ -45,9 +45,6 @@ export default function PagosPage() {
     return diff <= 5 && diff >= 0
   })
 
-  if (cargando)
-    return <p className="text-center text-muted-foreground p-6">Cargando...</p>
-
   return (
     <div
       className="

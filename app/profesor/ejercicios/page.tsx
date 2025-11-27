@@ -4,6 +4,8 @@ import { useState, useEffect } from "react"
 import { dataStore } from "@/lib/data-store"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronDown } from "lucide-react"
+import { useRef } from "react"
+import LoaderGlobal from "@/components/LoaderGlobal"
 
 type CategoriaDB = {
   cp: string
@@ -34,6 +36,8 @@ export default function EjerciciosPage() {
     "Tren Superior",
     "Tren Inferior",
   ]
+  const [sub2Abierta, setSub2Abierta] = useState<string | null>(null)
+  const contenidoRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const cargarCategorias = async () => {
@@ -48,11 +52,21 @@ export default function EjerciciosPage() {
     console.log("CATEGORIAS REALES:", categorias)
   }, [categorias])
 
-  if (cargando) {
-    return <p className="text-center text-muted-foreground">Cargando categorías...</p>
-  }
+  useEffect(() => {
+    if (categoriaActiva && contenidoRef.current) {
+      const timeout = setTimeout(() => {
+        contenidoRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        })
+      }, 150)
+
+      return () => clearTimeout(timeout)
+    }
+  }, [categoriaActiva])
 
   const categoriaSeleccionada = categorias.find(c => c.cp === categoriaActiva)
+
 
   return (
     <div className="space-y-6 p-6 w-[90%] mx-auto">
@@ -67,8 +81,7 @@ export default function EjerciciosPage() {
           .map((cat) => (
             <Card
               key={cat!.cp}
-              onClick={() => setCategoriaActiva(cat!.cp)}
-              className={`
+              onClick={() => setCategoriaActiva(cat!.cp)} className={`
           cursor-pointer rounded-2xl transition-all
           ${categoriaActiva === cat!.cp
                   ? "bg-[#1E3A5F] text-white shadow-lg"
@@ -85,15 +98,19 @@ export default function EjerciciosPage() {
 
       {/* CONTENIDO */}
       {categoriaSeleccionada && (
-        <div className="bg-white rounded-2xl p-5 shadow-md space-y-4">
+        <div
+          ref={contenidoRef}
+          className="bg-white rounded-2xl space-y-4"
+        >
 
-          <h2 className="text-xl font-semibold text-[#1E3A5F]">
+          <h2 className="text-xl font-semibold text-black">
             {categoriaSeleccionada.cp}
           </h2>
 
           {categoriaSeleccionada.s1?.map((sub) => (
-            <div key={sub.nombre} className="border rounded-xl p-3">
+            <div key={sub.nombre} className="border rounded-xl p-3 bg-[#E8F1FF]">
 
+              {/* S1 */}
               <button
                 onClick={() =>
                   setSubAbierta(subAbierta === sub.nombre ? null : sub.nombre)
@@ -106,20 +123,39 @@ export default function EjerciciosPage() {
                 />
               </button>
 
+              {/* CONTENIDO S1 */}
               {subAbierta === sub.nombre && (
                 <div className="mt-3 space-y-3 pl-2">
 
+                  {/* ===== S2 COMO ACCORDION ===== */}
                   {sub.s2?.map((s2) => (
-                    <div key={s2.nombre}>
-                      <h4 className="font-semibold text-sm">{s2.nombre}</h4>
-                      <ul className="ml-4 list-disc text-sm text-gray-600">
-                        {s2.ej?.map((ej) => (
-                          <li key={ej}>{ej}</li>
-                        ))}
-                      </ul>
+                    <div key={s2.nombre} className="border rounded-lg p-2 bg-gray-50">
+
+                      <button
+                        onClick={() =>
+                          setSub2Abierta(sub2Abierta === s2.nombre ? null : s2.nombre)
+                        }
+                        className="w-full flex justify-between items-center text-sm font-semibold text-[#1E3A5F]"
+                      >
+                        {s2.nombre}
+                        <ChevronDown
+                          size={16}
+                          className={`transition-transform ${sub2Abierta === s2.nombre ? "rotate-180" : ""}`}
+                        />
+                      </button>
+
+                      {sub2Abierta === s2.nombre && (
+                        <ul className="mt-2 ml-4 list-disc text-sm text-gray-600 space-y-1">
+                          {s2.ej?.map((ej) => (
+                            <li key={ej}>{ej}</li>
+                          ))}
+                        </ul>
+                      )}
+
                     </div>
                   ))}
 
+                  {/* EJERCICIOS DIRECTOS SI EXISTEN */}
                   {sub.ej && sub.ej.length > 0 && (
                     <ul className="ml-4 list-disc text-sm text-gray-600">
                       {sub.ej.map((ej) => (
