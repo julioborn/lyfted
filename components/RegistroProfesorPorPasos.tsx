@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown } from "lucide-react"
 import Swal from "sweetalert2"
 import { signIn } from "next-auth/react"
+import CardPago from "./pagos/TarjetaPago"
+import TarjetaPago from "./pagos/TarjetaPago"
 
 export default function RegistroProfesorPorPasos({ router }: { router: any }) {
     const [paso, setPaso] = useState(1)
@@ -31,63 +33,103 @@ export default function RegistroProfesorPorPasos({ router }: { router: any }) {
     const siguiente = () => setPaso((p) => Math.min(p + 1, 3))
     const anterior = () => setPaso((p) => Math.max(p - 1, 1))
 
-    const handleSubmit = async () => {
-        if (password !== confirmPassword) {
-            Swal.fire("⚠️", "Las contraseñas no coinciden", "warning")
-            return
-        }
+    const [planSuscripcion, setPlanSuscripcion] = useState("basico")
 
-        setLoading(true)
-        try {
-            const res = await fetch("/api/profesores", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    dni,
-                    nombre,
-                    apellido,
-                    email,
-                    telefono,
-                    password
-                })
-            })
+    // const handleSubmit = async () => {
+    //     if (password !== confirmPassword) {
+    //         Swal.fire("⚠️", "Las contraseñas no coinciden", "warning")
+    //         return
+    //     }
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => ({}))
-                Swal.fire("❌", data.error || "Error al registrar el profesor", "error")
-                return
-            }
+    //     setLoading(true)
+    //     try {
+    //         const res = await fetch("/api/profesores", {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json"
+    //             },
+    //             body: JSON.stringify({
+    //                 dni,
+    //                 nombre,
+    //                 apellido,
+    //                 email,
+    //                 telefono,
+    //                 password
+    //             })
+    //         })
 
-            // Auto-login
-            const result = await signIn("credentials", {
-                redirect: false,
-                identificador: dni,
-                password,
-                tipo: "profesor",
-            })
+    //         if (!res.ok) {
+    //             const data = await res.json().catch(() => ({}))
+    //             Swal.fire("❌", data.error || "Error al registrar el profesor", "error")
+    //             return
+    //         }
 
-            if (result?.error) {
-                Swal.fire("❌", "Error al iniciar sesión automáticamente", "error")
-                return
-            }
+    //         // Auto-login
+    //         const result = await signIn("credentials", {
+    //             redirect: false,
+    //             identificador: dni,
+    //             password,
+    //             tipo: "profesor",
+    //         })
 
-            Swal.fire("✅", "Registro completado correctamente", "success").then(() =>
-                router.replace("/profesor/bienvenida")
-            )
-        } catch (err) {
-            Swal.fire("❌", "Error interno del servidor", "error")
-        } finally {
-            setLoading(false)
-        }
-    }
+    //         if (result?.error) {
+    //             Swal.fire("❌", "Error al iniciar sesión automáticamente", "error")
+    //             return
+    //         }
+
+    //         Swal.fire("✅", "Registro completado correctamente", "success").then(() =>
+    //             router.replace("/profesor/bienvenida")
+    //         )
+    //     } catch (err) {
+    //         Swal.fire("❌", "Error interno del servidor", "error")
+    //     } finally {
+    //         setLoading(false)
+    //     }
+    // }
 
     const variants = {
         enter: { opacity: 0, x: 40 },
         center: { opacity: 1, x: 0 },
         exit: { opacity: 0, x: -40 },
     }
+
+    const handlePagar = async () => {
+        if (password !== confirmPassword) {
+            Swal.fire("⚠️", "Las contraseñas no coinciden", "warning");
+            return;
+        }
+
+        setLoading(true);
+
+        const res = await fetch("/api/pagos/crear-preferencia", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                plan: planSuscripcion,
+                profesorTemp: {
+                    dni,
+                    nombre,
+                    apellido,
+                    email,
+                    telefono,
+                    password,
+                    nombreGimnasio,
+                    ciudad,
+                    provincia,
+                },
+            }),
+        });
+
+        const data = await res.json();
+        setLoading(false);
+
+        if (!res.ok) {
+            Swal.fire("❌", data.error || "Error al crear la preferencia", "error");
+            return;
+        }
+
+        window.location.href = data.init_point;
+    };
 
     return (
         <div className="flex justify-center px-4 py-4">
@@ -206,36 +248,23 @@ export default function RegistroProfesorPorPasos({ router }: { router: any }) {
 
                         {/* 🚀 PANTALLA 3 */}
                         {paso === 3 && (
-                            <div className="space-y-2">
+                            <div className="space-y-6 pb-10">
+
                                 <StepTitle
-                                    texto="Tu cuenta está casi lista…"
-                                    descripcion="Solo falta un último paso para empezar a usar LYFTED. Confirmá tu método de pago y activá tu suscripción para acceder a todas las herramientas de la plataforma."
+                                    texto="Ingresá los datos de tu tarjeta"
+                                    descripcion="Tus datos están protegidos."
                                 />
 
-                                <Label>Método de pago</Label>
-                                <select
-                                    className="border rounded w-full p-2"
-                                    value={metodoPago}
-                                    onChange={(e) => setMetodoPago(e.target.value)}
-                                >
-                                    <option value="ninguno">Seleccionar</option>
-                                    <option value="tarjeta">Tarjeta de crédito</option>
-                                    <option value="transferencia">Transferencia bancaria</option>
-                                    <option value="otro">Otro</option>
-                                </select>
+                                <TarjetaPago />
 
-                                <div className="flex justify-between mt-6">
-                                    <Button variant="outline" onClick={anterior}>
-                                        ← Volver
-                                    </Button>
-                                    <Button
-                                        onClick={handleSubmit}
-                                        disabled={loading}
-                                        className="bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90"
-                                    >
-                                        {loading ? "Guardando..." : "Activar mi cuenta"}
-                                    </Button>
-                                </div>
+                                <Button
+                                    onClick={handlePagar}
+                                    disabled={loading}
+                                    className="bg-[#1E3A5F] text-white hover:bg-[#1E3A5F]/90 w-full py-3"
+                                >
+                                    {loading ? "Procesando..." : "Activar suscripción"}
+                                </Button>
+
                             </div>
                         )}
                     </motion.div>

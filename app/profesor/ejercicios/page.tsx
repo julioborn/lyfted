@@ -13,6 +13,10 @@ type CategoriaDB = {
     nombre: string
     s2?: {
       nombre: string
+      s3?: {
+        nombre: string
+        ej?: string[]
+      }[]
       ej?: string[]
     }[]
     ej?: string[]
@@ -37,6 +41,7 @@ export default function EjerciciosPage() {
     "Tren Inferior",
   ]
   const [sub2Abierta, setSub2Abierta] = useState<string | null>(null)
+  const [sub3Abierta, setSub3Abierta] = useState<string | null>(null)
   const contenidoRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -107,28 +112,27 @@ export default function EjerciciosPage() {
             {categoriaSeleccionada.cp}
           </h2>
 
-          {categoriaSeleccionada.s1?.map((sub) => (
-            <div key={sub.nombre} className="border rounded-xl p-3 bg-[#E8F1FF]">
+          {categoriaSeleccionada.s1?.map((s1) => (
+            <div key={s1.nombre} className="border rounded-xl p-3 bg-[#E8F1FF]">
 
-              {/* S1 */}
+              {/* ====== NIVEL S1 ====== */}
               <button
                 onClick={() =>
-                  setSubAbierta(subAbierta === sub.nombre ? null : sub.nombre)
+                  setSubAbierta(subAbierta === s1.nombre ? null : s1.nombre)
                 }
                 className="w-full flex justify-between items-center font-medium text-[#1E3A5F]"
               >
-                {sub.nombre}
+                {s1.nombre}
                 <ChevronDown
-                  className={`transition-transform ${subAbierta === sub.nombre ? "rotate-180" : ""}`}
+                  className={`transition-transform ${subAbierta === s1.nombre ? "rotate-180" : ""}`}
                 />
               </button>
 
-              {/* CONTENIDO S1 */}
-              {subAbierta === sub.nombre && (
+              {subAbierta === s1.nombre && (
                 <div className="mt-3 space-y-3 pl-2">
 
-                  {/* ===== S2 COMO ACCORDION ===== */}
-                  {sub.s2?.map((s2) => (
+                  {/* ====== NIVEL S2 ====== */}
+                  {s1.s2?.map((s2) => (
                     <div key={s2.nombre} className="border rounded-lg p-2 bg-gray-50">
 
                       <button
@@ -145,25 +149,58 @@ export default function EjerciciosPage() {
                       </button>
 
                       {sub2Abierta === s2.nombre && (
-                        <ul className="mt-2 ml-4 list-disc text-sm text-gray-600 space-y-1">
-                          {s2.ej?.map((ej) => (
-                            <li key={ej}>{ej}</li>
-                          ))}
-                        </ul>
-                      )}
+                        <div className="mt-2 ml-2 space-y-2">
 
+                          {/* ====== NIVEL S3 (también acordeón) ====== */}
+                          {s2.s3 && s2.s3.length > 0 ? (
+                            s2.s3.map((s3) => (
+                              <div
+                                key={s3.nombre}
+                                className="border rounded-md p-2 bg-white"
+                              >
+                                <button
+                                  onClick={() =>
+                                    setSub3Abierta(sub3Abierta === s3.nombre ? null : s3.nombre)
+                                  }
+                                  className="w-full flex justify-between items-center text-xs font-semibold text-[#1E3A5F]"
+                                >
+                                  {s3.nombre}
+                                  <ChevronDown
+                                    size={14}
+                                    className={`transition-transform ${sub3Abierta === s3.nombre ? "rotate-180" : ""}`}
+                                  />
+                                </button>
+
+                                {sub3Abierta === s3.nombre && (
+                                  <ul className="mt-2 ml-4 list-disc text-xs text-gray-600 space-y-1">
+                                    {s3.ej?.map((ej) => (
+                                      <li key={ej}>{ej}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            // Si el nivel s2 NO tiene s3 mostramos ejercicios directos
+                            <ul className="ml-4 list-disc text-xs text-gray-600 space-y-1">
+                              {s2.ej?.map((ej) => (
+                                <li key={ej}>{ej}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
 
-                  {/* EJERCICIOS DIRECTOS SI EXISTEN */}
-                  {sub.ej && sub.ej.length > 0 && (
+                  {/* EJERCICIOS DIRECTOS EN s1 */}
+                  {s1.ej && s1.ej.length > 0 && (
                     <ul className="ml-4 list-disc text-sm text-gray-600">
-                      {sub.ej.map((ej) => (
+                      {s1.ej.map((ej) => (
                         <li key={ej}>{ej}</li>
                       ))}
                     </ul>
                   )}
-
                 </div>
               )}
             </div>
