@@ -136,3 +136,7 @@
 //     </div>
 //   )
 // }
+
+export default function Page() {
+  return <div>Pagos</div>;
+}
