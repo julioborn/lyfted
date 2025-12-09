@@ -7,6 +7,7 @@ import { Users, Clock, DollarSign, Dumbbell } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import type { Alumno, PlanEntrenamiento, Pago } from "@/types"
+import LoaderGlobal from "@/components/LoaderGlobal"
 
 export default function DashboardProfesorPage() {
   const { data: session, status } = useSession()
@@ -41,8 +42,8 @@ export default function DashboardProfesorPage() {
     fetchData()
   }, [usuario, status])
 
-  if (status === "loading" || cargando) {
-    return <p className="p-6 text-center text-gray-600">Cargando...</p>
+  if (status !== "authenticated" || cargando) {
+    return <LoaderGlobal />
   }
 
   // 🔢 Cálculos

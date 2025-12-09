@@ -1,15 +1,16 @@
-import { NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
-import connectMongoDB from "@/lib/mongodb"
-import Profesor from "@/lib/models/Profesor"
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import connectMongoDB from "@/lib/mongodb";
+import Profesor from "@/lib/models/Profesor";
 
 export async function POST(req: Request) {
     try {
-        await connectMongoDB()
-        const body = await req.json()
+        await connectMongoDB();
+        const body = await req.json();
 
         const {
             nombre,
+            apellido,
             dni,
             telefono,
             password,
@@ -17,24 +18,28 @@ export async function POST(req: Request) {
             email,
             ciudad,
             provincia,
-            logo,
-        } = body
+            avatar,
+            plan,
+        } = body;
 
-        // 🔎 Verificar si ya existe un profesor con ese DNI o email
-        const existente = await Profesor.findOne({ $or: [{ dni }, { email }] })
+        // 🔎 Verificar si ya existe (reintentos de pago, refresh, etc.)
+        let existente = await Profesor.findOne({ dni });
+
         if (existente) {
-            return NextResponse.json(
-                { error: "Ya existe un entrenador con ese DNI o email" },
-                { status: 400 }
-            )
+            return NextResponse.json({
+                ok: true,
+                profesorId: existente._id,
+                existente: true
+            });
         }
 
         // 🔐 Encriptar contraseña
-        const hashedPassword = await bcrypt.hash(password, 10)
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // 🧾 Crear el nuevo profesor
         const nuevoProfesor = await Profesor.create({
             nombre,
+            apellido,
             dni,
             telefono,
             password: hashedPassword,
@@ -42,19 +47,24 @@ export async function POST(req: Request) {
             email,
             ciudad,
             provincia,
-            logo,
+            logo: avatar || null,
             registroCompleto: true,
-            activo: true,
-            planSuscripcion: "unico",
-            metodoPago: "ninguno",
-        })
+            activo: false,        // Se activa recién cuando MercadoPago lo aprueba
+            planSuscripcion: plan,
+            metodoPago: "mercadopago",
+        });
 
-        return NextResponse.json({ ok: true, profesor: nuevoProfesor })
+        return NextResponse.json({
+            ok: true,
+            profesorId: nuevoProfesor._id,
+            creado: true,
+        });
+
     } catch (error) {
-        console.error("❌ Error al crear profesor:", error)
+        console.error("❌ Error al crear profesor:", error);
         return NextResponse.json(
-            { error: "Error al registrar el entrenador" },
+            { error: "Error al registrar el profesor" },
             { status: 500 }
-        )
+        );
     }
 }

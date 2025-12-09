@@ -57,6 +57,10 @@ export default function DashboardAlumnoPage() {
   const iconBase =
     "p-4 bg-white rounded-full shadow-sm border border-[#1E3A5F]/10"
 
+  if (status === "loading" || cargando) {
+    return <LoaderGlobal />
+  }
+
   return (
     <div className="space-y-6 p-6 w-[90%] flex flex-col justify-center mx-auto">
       {/* TÍTULO */}
