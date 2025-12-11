@@ -12,30 +12,38 @@ const CategoriaEjercicioSchema = new Schema(
                     {
                         nombre: { type: String, required: true },
 
-                        // 🔥 Ahora soporta sub-subcategorías
                         s3: [
                             {
                                 nombre: { type: String, required: true },
-                                ej: [String],  // ejercicios dentro de s3
+
+                                // 🔥 NUEVO NIVEL s4
+                                s4: [
+                                    {
+                                        nombre: { type: String, required: true },
+                                        ej: [String],
+                                    }
+                                ],
+
+                                // ejercicios dentro de s3
+                                ej: [String],
                             },
                         ],
 
-                        // También permite ejercicios en s2 sin s3
+                        // ejercicios dentro de s2
                         ej: [String],
                     },
                 ],
 
-                // También permite ejercicios directos en s1
+                // ejercicios dentro de s1
                 ej: [String],
             },
         ],
 
-        // Ejercicios directos en categoría base
+        // ejercicios directos en la categoria base
         ej: [String],
     },
     { timestamps: true }
 );
 
-// 👇 ESTE NOMBRE ES LA CLAVE
 export default models.CategoriaEjercicio ||
-    model("CategoriaEjercicio", CategoriaEjercicioSchema, "categoriasEjercicios")
+    model("CategoriaEjercicio", CategoriaEjercicioSchema, "categoriasEjercicios");

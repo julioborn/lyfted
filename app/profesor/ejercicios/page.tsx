@@ -14,6 +14,10 @@ type CategoriaDB = {
       nombre: string
       s3?: {
         nombre: string
+        s4?: {
+          nombre: string
+          ej?: string[]
+        }[]
         ej?: string[]
       }[]
       ej?: string[]
@@ -28,10 +32,11 @@ export default function EjerciciosPage() {
   const [categorias, setCategorias] = useState<CategoriaDB[]>([])
   const [categoriaActiva, setCategoriaActiva] = useState<string | null>(null)
 
-  // 🔥 Ahora las keys son únicas por ruta completa
+  // 🔥 Keys únicas
   const [subAbierta, setSubAbierta] = useState<string | null>(null)
   const [sub2Abierta, setSub2Abierta] = useState<string | null>(null)
   const [sub3Abierta, setSub3Abierta] = useState<string | null>(null)
+  const [sub4Abierta, setSub4Abierta] = useState<string | null>(null) // ⭐ NUEVO
 
   const [cargando, setCargando] = useState(true)
 
@@ -65,7 +70,6 @@ export default function EjerciciosPage() {
           block: "start"
         })
       }, 150)
-
       return () => clearTimeout(timeout)
     }
   }, [categoriaActiva])
@@ -118,10 +122,10 @@ export default function EjerciciosPage() {
             return (
               <div key={s1.nombre} className="border rounded-xl p-3 bg-[#E8F1FF]">
 
-                {/* ===== NIVEL S1 ===== */}
+                {/* ===== S1 ===== */}
                 <button
                   onClick={() => setSubAbierta(subAbierta === keyS1 ? null : keyS1)}
-                  className="w-full flex justify-between items-center font-medium text-[#1E3A5F]"
+                  className="w-full flex justify-between items-center font-medium text-[#1E3A5F] cursor-pointer"
                 >
                   {s1.nombre}
                   <ChevronDown className={`transition-transform ${subAbierta === keyS1 ? "rotate-180" : ""}`} />
@@ -130,7 +134,7 @@ export default function EjerciciosPage() {
                 {subAbierta === keyS1 && (
                   <div className="mt-3 space-y-3 pl-2">
 
-                    {/* ===== NIVEL S2 ===== */}
+                    {/* ===== S2 ===== */}
                     {s1.s2?.map((s2) => {
 
                       const keyS2 = `${keyS1}-${s2.nombre}`
@@ -140,7 +144,7 @@ export default function EjerciciosPage() {
 
                           <button
                             onClick={() => setSub2Abierta(sub2Abierta === keyS2 ? null : keyS2)}
-                            className="w-full flex justify-between items-center text-sm font-semibold text-[#1E3A5F]"
+                            className="w-full flex justify-between items-center text-sm font-semibold text-[#1E3A5F] cursor-pointer"
                           >
                             {s2.nombre}
                             <ChevronDown size={16} className={`transition-transform ${sub2Abierta === keyS2 ? "rotate-180" : ""}`} />
@@ -149,7 +153,7 @@ export default function EjerciciosPage() {
                           {sub2Abierta === keyS2 && (
                             <div className="mt-2 ml-2 space-y-2">
 
-                              {/* NIVEL S3 */}
+                              {/* ===== S3 ===== */}
                               {s2.s3 && s2.s3.length > 0 ? (
                                 s2.s3.map((s3) => {
 
@@ -158,20 +162,59 @@ export default function EjerciciosPage() {
                                   return (
                                     <div key={s3.nombre} className="border rounded-md p-2 bg-white">
 
+                                      {/* ENCABEZADO S3 */}
                                       <button
                                         onClick={() => setSub3Abierta(sub3Abierta === keyS3 ? null : keyS3)}
-                                        className="w-full flex justify-between items-center text-xs font-semibold text-[#1E3A5F]"
+                                        className="w-full flex justify-between items-center text-xs font-semibold text-[#1E3A5F] cursor-pointer"
                                       >
                                         {s3.nombre}
                                         <ChevronDown size={14} className={`transition-transform ${sub3Abierta === keyS3 ? "rotate-180" : ""}`} />
                                       </button>
 
+                                      {/* CONTENIDO S3 */}
                                       {sub3Abierta === keyS3 && (
-                                        <ul className="mt-2 ml-4 list-disc text-xs text-gray-600 space-y-1">
-                                          {s3.ej?.map((ej) => (
-                                            <li key={ej}>{ej}</li>
-                                          ))}
-                                        </ul>
+                                        <div className="mt-2 ml-2 space-y-2">
+
+                                          {/* ⭐⭐⭐ NIVEL S4 ⭐⭐⭐ */}
+                                          {s3.s4 && s3.s4.length > 0 && (
+                                            s3.s4.map((s4) => {
+
+                                              const keyS4 = `${keyS3}-${s4.nombre}`
+
+                                              return (
+                                                <div key={s4.nombre} className="border rounded p-2 bg-gray-50">
+
+                                                  <button
+                                                    onClick={() => setSub4Abierta(sub4Abierta === keyS4 ? null : keyS4)}
+                                                    className="w-full flex justify-between items-center text-xs font-semibold text-[#1E3A5F] cursor-pointer"
+                                                  >
+                                                    {s4.nombre}
+                                                    <ChevronDown size={12} className={`transition-transform ${sub4Abierta === keyS4 ? "rotate-180" : ""}`} />
+                                                  </button>
+
+                                                  {sub4Abierta === keyS4 && (
+                                                    <ul className="mt-2 ml-4 list-disc text-xs text-gray-600 space-y-1">
+                                                      {s4.ej?.map((ej) => (
+                                                        <li key={ej}>{ej}</li>
+                                                      ))}
+                                                    </ul>
+                                                  )}
+
+                                                </div>
+                                              )
+                                            })
+                                          )}
+
+                                          {/* EJERCICIOS DIRECTOS EN S3 */}
+                                          {s3.ej && (
+                                            <ul className="ml-4 list-disc text-xs text-gray-600 space-y-1">
+                                              {s3.ej.map((ej) => (
+                                                <li key={ej}>{ej}</li>
+                                              ))}
+                                            </ul>
+                                          )}
+
+                                        </div>
                                       )}
 
                                     </div>
